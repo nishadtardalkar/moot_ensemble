@@ -253,64 +253,71 @@ final_rows = final_rows.drop_duplicates(subset=["_source_row"]).reset_index(drop
 # ---------------------------------
 # Metrics: Hypervolume + Spread
 # ---------------------------------
+
 # take the objective values from the rows we found
 F_metrics = final_rows[y_cols].copy().to_numpy(dtype=float)
 
-# convert to minimization form for pymoo HV
-# '-' stays the same, '+' gets negated
+# convert to minimization form
 for j, c in enumerate(y_cols):
     if c.endswith("+"):
         F_metrics[:, j] = -F_metrics[:, j]
 
-# hypervolume
-# reference point should be worse than all points
-ref_point = F_metrics.max(axis=0) + 1.0
+# -------- NORMALIZE OBJECTIVES --------
+mins = F_metrics.min(axis=0)
+maxs = F_metrics.max(axis=0)
+
+denom = (maxs - mins)
+denom[denom == 0] = 1  # avoid divide-by-zero
+
+F_norm = (F_metrics - mins) / denom
+
+# hypervolume reference point (slightly worse than worst point)
+ref_point = np.ones(F_norm.shape[1]) * 1.1
+
 hv = HV(ref_point=ref_point)
-hypervolume = hv(F_metrics)
+hypervolume = hv(F_norm)
 
-# spread (for 2 objectives)
-def spread_2d(F):
-    if len(F) < 2:
+
+
+def spread_mean_distance(F):
+    """
+    Spread metric based on mean pairwise distance.
+
+    F should be:
+    - normalized
+    - minimization form
+    """
+
+    n = len(F)
+
+    if n < 2:
         return np.nan
 
-    # sort by first objective
-    F = F[np.argsort(F[:, 0])]
+    # compute full distance matrix
+    dist_matrix = np.sqrt(((F[:, None, :] - F[None, :, :])**2).sum(axis=2))
 
-    # distances between consecutive points
-    d = np.sqrt(np.sum((F[1:] - F[:-1]) ** 2, axis=1))
+    # take upper triangle (ignore diagonal)
+    i, j = np.triu_indices(n, k=1)
+    distances = dist_matrix[i, j]
 
-    if len(d) == 0:
-        return np.nan
+    return float(np.mean(distances))
 
-    d_mean = np.mean(d)
-    if d_mean == 0:
-        return 0.0
+# spread (use normalized front)
+spread = spread_mean_distance(F_norm)
 
-    return float(np.sum(np.abs(d - d_mean)) / (len(d) * d_mean))
-
-spread = spread_2d(F_metrics) if F_metrics.shape[1] == 2 else np.nan
 
 print("\nPareto metrics:")
 print("Hypervolume:", round(float(hypervolume), 6))
 print("Spread:", "N/A for >2 objectives" if np.isnan(spread) else round(float(spread), 6))
-print("Non-dominated final rows used for metrics:", len(F_metrics))
-
-print("\nRuntime (seconds):", round(runtime, 4))
-print("Returned solutions:", len(res.X))
-print("Unique matched dataset rows:", len(final_rows))
-
-print("\nUnique final dataset rows:")
-print(final_rows[["_source_row"] + x_cols + y_cols].head(20))
-
-# optional save
-final_rows.to_csv("pareto_results.csv", index=False)
+print("Non-dominated final rows used for metrics:", len(F_norm))
 
 
 # ---------------------------------
 # Optional: plot if exactly 2 objectives
 # ---------------------------------
-if len(y_cols) == 2:
+'''if len(y_cols) == 2:
     plot_idx = final_rows["_source_row"].to_numpy()
+    print(final_rows["_source_row"].shape)
     F_plot = Y_original[plot_idx]
 
     plt.figure(figsize=(6, 5))
@@ -318,5 +325,33 @@ if len(y_cols) == 2:
     plt.xlabel(y_cols[0])
     plt.ylabel(y_cols[1])
     plt.title("NSGA-II on MOOT dataset")
+    plt.tight_layout()
+    plt.show()'''
+
+# ---------------------------------
+# Plot full frontier (optimizer solutions)
+# ---------------------------------
+if len(y_cols) == 2:
+
+    F = res.F.copy()
+
+    # convert back from minimization form
+    for j, c in enumerate(y_cols):
+        if c.endswith("+"):
+            F[:, j] = -F[:, j]
+
+    plt.figure(figsize=(6,5))
+
+    # optimizer frontier
+    plt.scatter(F[:,0], F[:,1], s=20, label="Optimizer Frontier")
+
+    # dataset rows we matched
+    dataset_points = final_rows[y_cols].to_numpy()
+    #plt.scatter(dataset_points[:,0], dataset_points[:,1],s=60, color="red", label="Dataset Matches")
+
+    plt.xlabel(y_cols[0])
+    plt.ylabel(y_cols[1])
+    plt.title("MOEA/D Pareto Frontier")
+    plt.legend()
     plt.tight_layout()
     plt.show()
