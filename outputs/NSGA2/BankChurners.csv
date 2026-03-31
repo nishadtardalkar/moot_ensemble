@@ -1,0 +1,33 @@
+CLIENTNUM,attrition_Flag,Customer_Age,gender,Dependent_count,education_Level,marital_Status,income_Category,card_Category,Months_on_book,Total_Relationship_Count,Months_Inactive_12_mon,Contacts_Count_12_mon,Credit_Limit+,Total_Revolving_Bal+,Avg_Open_To_Buy+,Total_Amt_Chng_Q4_Q1,Total_Trans_Amt,Total_Trans_Ct,Total_Ct_Chng_Q4_Q1+,Avg_Utilization_Ratio,Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1,Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2,_source_row
+718759833,Existing Customer,44,F,2,Uneducated,Married,Unknown,Silver,35,4,3,2,32643.0,0,32643.0,1.3,1058,24,2.429,0.0,0.00016711,0.99983,158
+710980383,Attrited Customer,53,M,3,High School,Single,$80K - $120K,Silver,33,2,2,3,34516.0,0,34516.0,0.534,6361,74,1.114,0.0,0.9943,0.0057,9619
+711509658,Attrited Customer,61,M,2,Graduate,Married,$120K +,Blue,49,3,0,4,11374.0,2517,8857.0,1.015,1088,26,1.167,0.221,0.98319,0.01681,1721
+811700058,Attrited Customer,41,M,2,Graduate,Single,$60K - $80K,Gold,36,2,3,3,34516.0,687,33829.0,1.015,4822,57,0.295,0.02,0.99714,0.00286013,8767
+819700533,Existing Customer,50,M,0,High School,Single,$120K +,Silver,45,5,2,3,14938.0,2303,12635.0,0.804,949,27,2.0,0.154,0.0001443,0.99986,300
+710178558,Attrited Customer,46,M,2,High School,Married,$60K - $80K,Gold,38,5,3,6,34516.0,2517,31999.0,0.956,9314,89,0.978,0.073,0.99943,0.00056902,9795
+720214833,Existing Customer,52,M,2,High School,Single,$80K - $120K,Silver,40,3,3,3,34516.0,2177,32339.0,1.32,1234,23,1.875,0.063,0.00026573,0.99973,323
+718267233,Existing Customer,50,M,1,Graduate,Married,$120K +,Silver,38,4,3,3,34516.0,1915,32601.0,0.625,3828,65,1.321,0.055,0.00025657,0.99974,5988
+798983508,Existing Customer,43,M,1,Graduate,Single,$80K - $120K,Silver,37,4,3,2,34516.0,1440,33076.0,1.117,1575,34,2.4,0.042,0.00015255,0.99985,280
+789780033,Existing Customer,33,M,3,College,Married,$80K - $120K,Silver,22,6,2,2,34516.0,917,33599.0,0.764,14202,114,0.781,0.027,0.00010375,0.9999,9815
+710812533,Attrited Customer,46,F,3,High School,Single,Unknown,Silver,36,4,2,3,34516.0,154,34362.0,0.602,1987,46,0.586,0.004,0.9943,0.0057,4487
+714190983,Attrited Customer,51,F,2,Graduate,Single,Unknown,Platinum,32,2,3,3,34516.0,531,33985.0,0.98,5418,65,0.711,0.015,0.9981,0.00189855,9102
+789013833,Attrited Customer,50,M,2,High School,Married,$120K +,Silver,37,5,2,1,34516.0,399,34117.0,0.726,2118,41,0.519,0.012,0.98369,0.01631,4988
+719070108,Existing Customer,44,M,2,Graduate,Married,$80K - $120K,Silver,35,4,1,3,34516.0,1726,32790.0,0.867,1729,52,0.677,0.05,8.37e-05,0.99992,892
+754443033,Attrited Customer,50,M,1,Graduate,Single,$80K - $120K,Silver,43,6,3,3,34516.0,432,34084.0,0.807,9045,72,1.0,0.013,0.99612,0.0038814,9474
+719658858,Existing Customer,50,F,4,Doctorate,Married,Unknown,Silver,36,3,2,1,34516.0,2096,32420.0,0.666,7042,73,0.553,0.061,9.41e-05,0.99991,8663
+714959358,Attrited Customer,50,M,3,High School,Married,$80K - $120K,Silver,36,5,3,3,34516.0,2292,32224.0,0.876,8045,71,0.868,0.066,0.99639,0.00361254,9221
+713916708,Existing Customer,53,M,3,Graduate,Single,$120K +,Gold,43,3,1,3,34516.0,2435,32081.0,0.77,7758,98,0.719,0.071,0.00011075,0.99989,8586
+713264583,Existing Customer,43,M,2,High School,Married,$120K +,Silver,23,3,3,2,34516.0,1153,33363.0,0.89,4486,71,0.69,0.033,0.000158,0.99984,4819
+715729683,Existing Customer,44,M,3,High School,Single,$120K +,Silver,36,1,2,2,34516.0,1106,33410.0,0.776,7936,76,0.767,0.032,0.00010374,0.9999,8706
+714757908,Existing Customer,46,M,4,Graduate,Married,$120K +,Silver,36,4,1,3,34516.0,1380,33136.0,0.66,2163,56,0.4,0.04,8.78e-05,0.99991,2629
+788386908,Existing Customer,48,M,3,Graduate,Unknown,$80K - $120K,Platinum,41,3,2,2,34516.0,1531,32985.0,0.862,1156,29,1.071,0.044,0.00020517,0.99979,443
+711832533,Existing Customer,42,M,3,High School,Single,$80K - $120K,Silver,32,3,3,3,34516.0,1396,33120.0,0.688,3748,62,0.938,0.04,0.00027574,0.99972,5487
+789535233,Existing Customer,52,M,1,Graduate,Single,$80K - $120K,Silver,44,2,1,2,34516.0,1618,32898.0,1.0,11603,109,0.847,0.047,4.67e-05,0.99995,9161
+712191783,Existing Customer,49,M,4,High School,Married,$120K +,Gold,36,1,1,1,34516.0,1634,32882.0,0.768,7788,94,0.469,0.047,3.9e-05,0.99996,8891
+714926508,Existing Customer,52,M,2,Graduate,Married,$80K - $120K,Silver,45,5,4,2,34516.0,1938,32578.0,0.807,2275,46,0.438,0.056,0.00019642,0.9998,4242
+770842833,Attrited Customer,49,F,3,High School,Married,Unknown,Silver,36,2,3,3,34516.0,1273,33243.0,0.977,4777,51,0.457,0.037,0.99639,0.00361254,8665
+779885358,Existing Customer,51,M,0,College,Married,$120K +,Silver,35,5,1,2,34516.0,2332,32184.0,0.8,4587,82,0.745,0.068,4.15e-05,0.99996,6641
+812618883,Existing Customer,47,M,2,High School,Divorced,Unknown,Silver,42,1,2,2,34516.0,2019,32497.0,0.706,7774,95,0.583,0.058,0.0001,0.9999,8721
+717708783,Existing Customer,57,M,2,Graduate,Single,$120K +,Silver,51,6,3,4,34516.0,1417,33099.0,0.966,4303,77,0.638,0.041,0.00046626,0.99953,4378
+770968383,Attrited Customer,41,M,4,Graduate,Married,$80K - $120K,Silver,28,3,2,3,34516.0,825,33691.0,0.616,2022,52,0.733,0.024,0.99452,0.00548,5979
+714785508,Existing Customer,49,M,2,High School,Single,$80K - $120K,Silver,40,4,3,2,34516.0,1313,33203.0,0.583,15154,99,0.833,0.038,0.000158,0.99984,9923

@@ -1,0 +1,4 @@
+ee_instrument,simplifycfg,ipsccp,called_value_propagation,basicaa,instcombine,inline,mergereturn,jump_threading,pgo_memop_opt,tailcallelim,licm,sink,gvn,sccp,adce,Performance-,Cpu-,_source_row
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,52285.4,25.431538,0
+0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,0,57245.4,25.364561,14
+0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,55493.0,25.402877,2

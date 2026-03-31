@@ -1,0 +1,3 @@
+opt_useAddressPrecalc,opt_vectorize,simd_avoidUnaligned,data_alignFieldPointers,opt_unroll_interleave,opt_unroll,no_explorationId,explorationId,poly_tileSize_x,poly_tileSize_y,poly_tileSize_z,Compile-performance-,Fixed-compile-cpu-,_source_row
+1,0,0,0,0,1,0,1,32,10,128,2968.8,5.600666,15704
+1,0,0,0,0,1,0,1,20,0,10,2853.6,5.82554,10312
