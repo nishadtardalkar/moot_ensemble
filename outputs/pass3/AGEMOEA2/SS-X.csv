@@ -1,0 +1,4 @@
+opt_useAddressPrecalc,opt_vectorize,simd_avoidUnaligned,data_alignFieldPointers,opt_unroll_interleave,opt_unroll,no_explorationId,explorationId,poly_tileSize_x,poly_tileSize_y,poly_tileSize_z,Compile-performance-,Fixed-compile-cpu-,_source_row,_source_algorithm,_source_file,_runtime_sec
+1,1,0,0,0,3,1,0,0,0,0,1589.6,3.912733,14,RVEA,outputs\RVEA\SS-X.csv,0.19650912284851074
+0,1,0,0,0,1,1,0,0,0,0,1598.0,3.09018,16,RVEA,outputs\RVEA\SS-X.csv,0.19650912284851074
+1,0,0,0,0,1,1,0,0,0,0,1615.6,3.029099,0,AGEMOEA,outputs\AGEMOEA\SS-X.csv,0.19650912284851074

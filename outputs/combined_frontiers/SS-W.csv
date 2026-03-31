@@ -1,0 +1,16 @@
+ee_instrument,simplifycfg,ipsccp,called_value_propagation,basicaa,instcombine,inline,mergereturn,jump_threading,pgo_memop_opt,tailcallelim,licm,sink,gvn,sccp,adce,Performance-,Cpu-,_source_row,_source_algorithm,_source_file
+0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,0,57245.4,25.364561,14,AGEMOEA,outputs\AGEMOEA\SS-W.csv
+0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,0,57245.4,25.364561,14,AGEMOEA2,outputs\AGEMOEA2\SS-W.csv
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,52285.4,25.431538,0,AGEMOEA2,outputs\AGEMOEA2\SS-W.csv
+0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,0,57245.4,25.364561,14,combined_frontiers,outputs\combined_frontiers\SS-W.csv
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,52285.4,25.431538,0,combined_frontiers,outputs\combined_frontiers\SS-W.csv
+0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,55493.0,25.402877,2,combined_frontiers,outputs\combined_frontiers\SS-W.csv
+0,1,1,0,0,1,0,0,0,0,0,0,0,1,1,0,63165.4,25.270502,11267,combined_frontiers,outputs\combined_frontiers\SS-W.csv
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,52285.4,25.431538,0,NSGA2,outputs\NSGA2\SS-W.csv
+0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,0,57245.4,25.364561,14,NSGA2,outputs\NSGA2\SS-W.csv
+0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,55493.0,25.402877,2,NSGA2,outputs\NSGA2\SS-W.csv
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,52285.4,25.431538,0,NSGA3,outputs\NSGA3\SS-W.csv
+0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,55493.0,25.402877,2,NSGA3,outputs\NSGA3\SS-W.csv
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,52285.4,25.431538,0,RNSGA3,outputs\RNSGA3\SS-W.csv
+0,1,1,0,0,1,0,0,0,0,0,0,0,1,1,0,63165.4,25.270502,11267,UNSGA3,outputs\UNSGA3\SS-W.csv
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,52285.4,25.431538,0,UNSGA3,outputs\UNSGA3\SS-W.csv
