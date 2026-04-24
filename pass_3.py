@@ -195,30 +195,148 @@ def merge_frontiers(input_dir: Path):
     files = sorted(input_dir.glob("*/*.csv"))
     groups = {}
     for f in files:
-        if f.parent.name == "combined_frontiers":
+        # Skip aggregate summary from pass_1.
+        if f.name.lower() == "summary.csv":
             continue
-        groups.setdefault(f.name, []).append(f)
+        dataset_name = f.parent.name
+        groups.setdefault(dataset_name, []).append(f)
 
     merged = {}
-    for dataset_file, paths in groups.items():
-        chunks = []
-        for p in paths:
-            df = pd.read_csv(p).copy()
-            df["_source_algorithm"] = p.parent.name
-            df["_source_file"] = str(p)
-            chunks.append(df)
+    for dataset_name, paths in groups.items():
+        chunks = [pd.read_csv(p) for p in paths]
         merged_df = pd.concat(chunks, ignore_index=True).drop_duplicates().reset_index(drop=True)
-        merged[dataset_file] = merged_df
+        merged[dataset_name] = merged_df
     return merged
+
+
+def normalize_dataset_name(dataset_value):
+    return Path(str(dataset_value)).stem
+
+
+def compare_pass3_vs_pass1_per_algo(pass3_summary: pd.DataFrame, pass1_summary: pd.DataFrame):
+    """
+    Return percent-better metrics per pass_3 algorithm against pass_1 algorithms:
+    - hv_better_pct: percent of pairwise comparisons where pass_3 hv is higher
+    - spread_better_pct: percent of pairwise comparisons where pass_3 spread is higher
+    - igd/mdh_better_pct: percent of pairwise comparisons where pass_3 is lower
+    """
+    if pass3_summary.empty or pass1_summary.empty:
+        return pd.DataFrame(
+            columns=[
+                "algorithm",
+                "hv_better_pct",
+                "spread_better_pct",
+                "igd_better_pct",
+                "mdh_better_pct",
+            ]
+        )
+
+    required_cols = {"dataset", "hv", "spread", "igd", "mdh"}
+    if not required_cols.issubset(set(pass3_summary.columns)):
+        raise ValueError(
+            "pass_3 summary must contain 'dataset', 'hv', 'spread', 'igd', and 'mdh' columns."
+        )
+    if not required_cols.issubset(set(pass1_summary.columns)):
+        raise ValueError(
+            "pass_1 summary must contain 'dataset', 'hv', 'spread', 'igd', and 'mdh' columns."
+        )
+    if "algorithm" not in pass3_summary.columns:
+        raise ValueError("pass_3 summary must contain 'algorithm' column.")
+
+    p3 = pass3_summary.copy()
+    p1 = pass1_summary.copy()
+    p3["dataset_key"] = p3["dataset"].map(normalize_dataset_name)
+    p1["dataset_key"] = p1["dataset"].map(normalize_dataset_name)
+    p3["hv"] = pd.to_numeric(p3["hv"], errors="coerce")
+    p1["hv"] = pd.to_numeric(p1["hv"], errors="coerce")
+    p3["spread"] = pd.to_numeric(p3["spread"], errors="coerce")
+    p1["spread"] = pd.to_numeric(p1["spread"], errors="coerce")
+    p3["igd"] = pd.to_numeric(p3["igd"], errors="coerce")
+    p1["igd"] = pd.to_numeric(p1["igd"], errors="coerce")
+    p3["mdh"] = pd.to_numeric(p3["mdh"], errors="coerce")
+    p1["mdh"] = pd.to_numeric(p1["mdh"], errors="coerce")
+
+    rows = []
+    for algorithm, group in p3.groupby("algorithm"):
+        hv_better_total = 0
+        spread_better_total = 0
+        igd_better_total = 0
+        mdh_better_total = 0
+        hv_cmp_total = 0
+        spread_cmp_total = 0
+        igd_cmp_total = 0
+        mdh_cmp_total = 0
+
+        for _, p3_row in group.iterrows():
+            p3_hv = p3_row["hv"]
+            p3_spread = p3_row["spread"]
+            p3_igd = p3_row["igd"]
+            p3_mdh = p3_row["mdh"]
+            if pd.isna(p3_hv) or pd.isna(p3_spread) or pd.isna(p3_igd) or pd.isna(p3_mdh):
+                continue
+
+            p1_dataset = p1[p1["dataset_key"] == p3_row["dataset_key"]]
+            p1_hv = p1_dataset["hv"].dropna()
+            p1_spread = p1_dataset["spread"].dropna()
+            p1_igd = p1_dataset["igd"].dropna()
+            p1_mdh = p1_dataset["mdh"].dropna()
+            if p1_hv.empty or p1_spread.empty or p1_igd.empty or p1_mdh.empty:
+                continue
+
+            hv_cmp_total += int(len(p1_hv))
+            spread_cmp_total += int(len(p1_spread))
+            igd_cmp_total += int(len(p1_igd))
+            mdh_cmp_total += int(len(p1_mdh))
+            hv_better_total += int((p3_hv > p1_hv).sum())
+            spread_better_total += int((p3_spread > p1_spread).sum())
+            igd_better_total += int((p3_igd < p1_igd).sum())
+            mdh_better_total += int((p3_mdh < p1_mdh).sum())
+
+        if hv_cmp_total == 0 and spread_cmp_total == 0 and igd_cmp_total == 0 and mdh_cmp_total == 0:
+            rows.append(
+                {
+                    "algorithm": algorithm,
+                    "hv_better_pct": np.nan,
+                    "spread_better_pct": np.nan,
+                    "igd_better_pct": np.nan,
+                    "mdh_better_pct": np.nan,
+                }
+            )
+        else:
+            rows.append(
+                {
+                    "algorithm": algorithm,
+                    "hv_better_pct": float(100.0 * hv_better_total / hv_cmp_total)
+                    if hv_cmp_total > 0
+                    else np.nan,
+                    "spread_better_pct": float(100.0 * spread_better_total / spread_cmp_total)
+                    if spread_cmp_total > 0
+                    else np.nan,
+                    "igd_better_pct": float(100.0 * igd_better_total / igd_cmp_total)
+                    if igd_cmp_total > 0
+                    else np.nan,
+                    "mdh_better_pct": float(100.0 * mdh_better_total / mdh_cmp_total)
+                    if mdh_cmp_total > 0
+                    else np.nan,
+                }
+            )
+
+    return pd.DataFrame(rows).sort_values("algorithm").reset_index(drop=True)
 
 
 def main():
     parser = argparse.ArgumentParser(
         description="Pass 3: optimize over merged pass-1 frontiers (no pairwise merge)."
     )
-    parser.add_argument("--input-dir", default="outputs", help="Pass-1 outputs directory.")
     parser.add_argument(
-        "--out-dir", default="outputs/pass3", help="Directory for pass-3 generated frontiers."
+        "--input-dir",
+        default="pass_1_outputs",
+        help="Pass-1 outputs root (expects pass_1_outputs/<dataset>/<algorithm>.csv; skips summary.csv).",
+    )
+    parser.add_argument(
+        "--out-dir",
+        default="pass_3_outputs",
+        help="Directory for pass-3 generated frontiers in pass_1 format.",
     )
     parser.add_argument("--pop-size", type=int, default=40, help="Population size.")
     parser.add_argument("--n-gen", type=int, default=20, help="Generations.")
@@ -235,16 +353,27 @@ def main():
         default=None,
         help="Run one algorithm by id; default runs all.",
     )
+    parser.add_argument(
+        "--pass1-summary",
+        default=None,
+        help=(
+            "Path to pass_1 summary CSV for comparison "
+            "(default: <input-dir>/summary.csv)."
+        ),
+    )
     args = parser.parse_args()
 
     merged_by_dataset = merge_frontiers(Path(args.input_dir))
     if not merged_by_dataset:
-        raise FileNotFoundError(f"No frontier csv files found in {args.input_dir}/*/*.csv")
+        raise FileNotFoundError(
+            f"No frontier csv files found in {args.input_dir}/*/*.csv "
+            "(after skipping combined_frontiers/ and summary.csv)."
+        )
 
     metrics_rows = []
 
-    for dataset_file, df in merged_by_dataset.items():
-        print(f"\nDataset: {dataset_file} | merged rows: {len(df)}")
+    for dataset_name, df in merged_by_dataset.items():
+        print(f"\nDataset: {dataset_name} | merged rows: {len(df)}")
         x_cols, y_cols = parse_moot_columns(df)
         maximize_mask = np.array([c.endswith("+") for c in y_cols], dtype=bool)
         X_num, X_cat, num_cols, cat_cols = build_mixed_x(df, x_cols)
@@ -262,85 +391,165 @@ def main():
         algorithms = build_algorithms(problem, args.pop_size)
         algo_ids = [args.algorithm_id] if args.algorithm_id is not None else list(range(len(algorithms)))
 
-        for aid in algo_ids:
-            if aid < 0 or aid >= len(algorithms):
-                raise ValueError(f"Invalid algorithm_id={aid}. Valid ids: 0..{len(algorithms)-1}")
-            algorithm = algorithms[aid]
-            algorithm_name = algorithm.__class__.__name__
-            print(f"  Running {aid}: {algorithm_name}")
+        dataset_output_paths = []
+        dataset_metric_rows = []
+        try:
+            for aid in algo_ids:
+                if aid < 0 or aid >= len(algorithms):
+                    raise ValueError(f"Invalid algorithm_id={aid}. Valid ids: 0..{len(algorithms)-1}")
+                algorithm = algorithms[aid]
+                algorithm_name = algorithm.__class__.__name__
+                print(f"  Running {aid}: {algorithm_name}")
 
-            start = time.time()
-            res = minimize(
-                problem,
-                algorithm,
-                get_termination("n_gen", args.n_gen),
-                seed=args.seed,
-                verbose=False,
+                out_dataset_dir = Path(args.out_dir) / dataset_name
+                out_dataset_dir.mkdir(parents=True, exist_ok=True)
+                out_path = out_dataset_dir / f"{algorithm_name}.csv"
+
+                if out_path.exists():
+                    print(f"    Skipping existing output for {dataset_name}/{algorithm_name}: {out_path}")
+                    final_rows = pd.read_csv(out_path)
+                    frontier_values = to_numeric_objectives(final_rows, y_cols)
+                    if len(frontier_values) == 0:
+                        print("    Warning: existing output has no valid objective rows; skipping metrics row.")
+                        continue
+
+                    reference_values = None
+                    source_path = find_source_csv(f"{dataset_name}.csv", args.data_roots)
+                    if source_path is not None:
+                        source_df = pd.read_csv(source_path)
+                        if all(c in source_df.columns for c in y_cols):
+                            source_values = to_numeric_objectives(source_df, y_cols)
+                            if len(source_values) > 0:
+                                source_min = source_values.copy()
+                                source_min[:, maximize_mask] = -source_min[:, maximize_mask]
+                                source_nd = non_dominated_mask(source_min)
+                                reference_values = source_values[source_nd]
+
+                    metrics = calculate_pareto_metrics(
+                        frontier=frontier_values,
+                        reference_front=reference_values,
+                        maximize_mask=maximize_mask,
+                        normalize=True,
+                    )
+                    dataset_metric_rows.append(
+                        {
+                            "algorithm": algorithm_name,
+                            "dataset": f"{dataset_name}.csv",
+                            "input_files": 1,
+                            "merged_rows": int(len(final_rows)),
+                            "pareto_rows": int(len(final_rows)),
+                            "reference_rows": int(len(reference_values)) if reference_values is not None else 0,
+                            "hv": metrics["hv"],
+                            "spread": metrics["spread"],
+                            "igd": metrics["igd"],
+                            "mdh": metrics["mdh"],
+                            "output_file": str(out_path),
+                        }
+                    )
+                    continue
+
+                start = time.time()
+                res = minimize(
+                    problem,
+                    algorithm,
+                    get_termination("n_gen", args.n_gen),
+                    seed=args.seed,
+                    verbose=False,
+                )
+                runtime = time.time() - start
+
+                final_idx = []
+                for i in range(res.X.shape[0]):
+                    dist = np.zeros(len(df_valid), dtype=np.float32)
+                    if X_num is not None:
+                        cand_num = res.X[i, : len(num_cols)]
+                        dist += ((X_num - cand_num) ** 2).sum(axis=1)
+                    if X_cat is not None:
+                        cand_cat = np.rint(res.X[i, len(num_cols) :]).astype(np.int32)
+                        dist += (X_cat != cand_cat).sum(axis=1)
+                    final_idx.append(np.argmin(dist))
+
+                final_rows = df_valid.iloc[np.array(final_idx)].copy().reset_index(drop=True)
+                final_rows["_source_row"] = np.array(final_idx)
+                final_rows = final_rows.drop_duplicates(subset=["_source_row"]).reset_index(drop=True)
+                final_rows.to_csv(out_path, index=False)
+                dataset_output_paths.append(out_path)
+                print(f"    wrote {len(final_rows)} rows -> {out_path} ({runtime:.1f}s)")
+
+                # Metrics for pass-3 generated frontier
+                frontier_values = to_numeric_objectives(final_rows, y_cols)
+                reference_values = None
+                source_path = find_source_csv(f"{dataset_name}.csv", args.data_roots)
+                if source_path is not None:
+                    source_df = pd.read_csv(source_path)
+                    if all(c in source_df.columns for c in y_cols):
+                        source_values = to_numeric_objectives(source_df, y_cols)
+                        if len(source_values) > 0:
+                            source_min = source_values.copy()
+                            source_min[:, maximize_mask] = -source_min[:, maximize_mask]
+                            source_nd = non_dominated_mask(source_min)
+                            reference_values = source_values[source_nd]
+
+                metrics = calculate_pareto_metrics(
+                    frontier=frontier_values,
+                    reference_front=reference_values,
+                    maximize_mask=maximize_mask,
+                    normalize=True,
+                )
+                dataset_metric_rows.append(
+                    {
+                        "algorithm": algorithm_name,
+                        "dataset": f"{dataset_name}.csv",
+                        "input_files": 1,
+                        "merged_rows": int(res.X.shape[0]),
+                        "pareto_rows": int(len(final_rows)),
+                        "reference_rows": int(len(reference_values)) if reference_values is not None else 0,
+                        "hv": metrics["hv"],
+                        "spread": metrics["spread"],
+                        "igd": metrics["igd"],
+                        "mdh": metrics["mdh"],
+                        "output_file": str(out_path),
+                    }
+                )
+            metrics_rows.extend(dataset_metric_rows)
+        except Exception as exc:
+            print(
+                f"  Discarding dataset {dataset_name}: algorithm failed with "
+                f"{type(exc).__name__}: {exc}"
             )
-            runtime = time.time() - start
-
-            final_idx = []
-            for i in range(res.X.shape[0]):
-                dist = np.zeros(len(df_valid), dtype=np.float32)
-                if X_num is not None:
-                    cand_num = res.X[i, : len(num_cols)]
-                    dist += ((X_num - cand_num) ** 2).sum(axis=1)
-                if X_cat is not None:
-                    cand_cat = np.rint(res.X[i, len(num_cols) :]).astype(np.int32)
-                    dist += (X_cat != cand_cat).sum(axis=1)
-                final_idx.append(np.argmin(dist))
-
-            final_rows = df_valid.iloc[np.array(final_idx)].copy().reset_index(drop=True)
-            final_rows["_source_row"] = np.array(final_idx)
-            final_rows = final_rows.drop_duplicates(subset=["_source_row"]).reset_index(drop=True)
-            final_rows["_runtime_sec"] = runtime
-
-            out_alg_dir = Path(args.out_dir) / algorithm_name
-            out_alg_dir.mkdir(parents=True, exist_ok=True)
-            out_path = out_alg_dir / dataset_file
-            final_rows.to_csv(out_path, index=False)
-            print(f"    wrote {len(final_rows)} rows -> {out_path}")
-
-            # Metrics for pass-3 generated frontier
-            frontier_values = to_numeric_objectives(final_rows, y_cols)
-            reference_values = None
-            source_path = find_source_csv(dataset_file, args.data_roots)
-            if source_path is not None:
-                source_df = pd.read_csv(source_path)
-                if all(c in source_df.columns for c in y_cols):
-                    source_values = to_numeric_objectives(source_df, y_cols)
-                    if len(source_values) > 0:
-                        source_min = source_values.copy()
-                        source_min[:, maximize_mask] = -source_min[:, maximize_mask]
-                        source_nd = non_dominated_mask(source_min)
-                        reference_values = source_values[source_nd]
-
-            metrics = calculate_pareto_metrics(
-                frontier=frontier_values,
-                reference_front=reference_values,
-                maximize_mask=maximize_mask,
-                normalize=True,
-            )
-            metrics_rows.append(
-                {
-                    "algorithm": algorithm_name,
-                    "dataset": dataset_file,
-                    "reference_rows": int(len(reference_values)) if reference_values is not None else 0,
-                    "hv": metrics["hv"],
-                    "spread": metrics["spread"],
-                    "igd": metrics["igd"],
-                    "mdh": metrics["mdh"],
-                    "output_file": str(out_path),
-                }
-            )
+            for path in dataset_output_paths:
+                try:
+                    if path.exists():
+                        path.unlink()
+                        print(f"  Removed partial output: {path}")
+                except Exception as cleanup_exc:
+                    print(
+                        f"  Warning: failed to remove partial output {path}: "
+                        f"{type(cleanup_exc).__name__}: {cleanup_exc}"
+                    )
+            continue
 
     # Save pass-3 metrics summary
-    summary_path = Path(args.out_dir) / "metrics_summary.csv"
+    summary_path = Path(args.out_dir) / "summary.csv"
     summary_df = pd.DataFrame(metrics_rows)
     summary_df.to_csv(summary_path, index=False)
     print(f"\nWrote pass-3 metrics summary: {summary_path}")
     if not summary_df.empty:
         print(summary_df.sort_values(["dataset", "algorithm"]).to_string(index=False))
+
+    pass1_summary_path = (
+        Path(args.pass1_summary) if args.pass1_summary else (Path(args.input_dir) / "summary.csv")
+    )
+    if pass1_summary_path.exists():
+        pass1_summary = pd.read_csv(pass1_summary_path)
+        comparison_df = compare_pass3_vs_pass1_per_algo(summary_df, pass1_summary)
+        comparison_path = Path(args.out_dir) / "hv_comparison_vs_pass1.csv"
+        comparison_df.to_csv(comparison_path, index=False)
+        print(f"\nWrote pass_3 vs pass_1 comparison: {comparison_path}")
+        if not comparison_df.empty:
+            print(comparison_df.to_string(index=False))
+    else:
+        print(f"\nSkipping pass_3 vs pass_1 comparison: missing {pass1_summary_path}")
 
 
 if __name__ == "__main__":

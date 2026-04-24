@@ -1,0 +1,3 @@
+Spouts,Max_spout,Sorters,Emit_freq,Chunk_size,Message_size,Throughput+,Latency-,_source_row
+3,1000,9,10,1000000.0,100000.0,129000.0,174.47,35
+3,10000,12,300,10000000.0,10000.0,222000.0,1252.1,62

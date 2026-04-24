@@ -1,6 +1,7 @@
 import time
 import os
 import argparse
+import glob
 from pathlib import Path
 from math import comb
 import numpy as np
@@ -20,16 +21,62 @@ from pymoo.termination import get_termination
 from pymoo.algorithms.moo.moead import MOEAD
 from pymoo.util.ref_dirs import get_reference_directions
 
+from get_metrics import calculate_pareto_metrics
+
+
+# ---------------------------------
+# Pareto metrics (same helpers as pass_2)
+# ---------------------------------
+def parse_objective_columns(columns):
+    obj_cols = [c for c in columns if c.endswith(("+", "-"))]
+    maximize_mask = np.array([c.endswith("+") for c in obj_cols], dtype=bool)
+    return obj_cols, maximize_mask
+
+
+def non_dominated_mask(F):
+    n = F.shape[0]
+    mask = np.ones(n, dtype=bool)
+    for i in range(n):
+        if not mask[i]:
+            continue
+        dominates_i = np.all(F[i] <= F, axis=1) & np.any(F[i] < F, axis=1)
+        mask[dominates_i] = False
+        mask[i] = True
+    return mask
+
+
+def find_source_csv(dataset_filename, search_roots):
+    for root in search_roots:
+        root_path = Path(root)
+        if not root_path.exists():
+            continue
+        direct = root_path / dataset_filename
+        if direct.exists():
+            return direct
+        matches = list(root_path.rglob(dataset_filename))
+        if matches:
+            return matches[0]
+    return None
+
+
+def to_numeric_objectives(df, obj_cols):
+    out = df[obj_cols].copy()
+    for c in obj_cols:
+        out[c] = pd.to_numeric(out[c], errors="coerce")
+    out = out.dropna(subset=obj_cols)
+    return out.to_numpy(dtype=float)
+
 
 # ---------------------------------
 # CONFIG
 # ---------------------------------
-CSV_PATH = (
-    "moot/behavior_data/all_players.csv"  # default; can be overridden by args/env
-)
 POP_SIZE = 40  # start smaller for big datasets
 N_GEN = 20  # start smaller for big datasets
 SEED = 1
+OUTPUT_ROOT = Path("pass_1_outputs")
+
+# CSV stems (filename without .csv) to skip. Also use --skip-datasets on the CLI.
+SKIP_DATASETS = frozenset()
 
 
 # ---------------------------------
@@ -132,46 +179,65 @@ def build_objective_matrix(df: pd.DataFrame, y_cols):
 # ---------------------------------
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Run MOOT optimization on a CSV dataset."
+        description=(
+            "Run MOOT optimization (all algorithms by default). "
+            "With no CSV path and no MOOT_CSV_PATH env, discovers inputs via --glob."
+        )
     )
     parser.add_argument(
         "csv_file",
         nargs="?",
-        default=os.environ.get("MOOT_CSV_PATH", CSV_PATH),
-        help="Path to CSV file (or env MOOT_CSV_PATH)",
+        default=None,
+        help=(
+            "Optional path to one CSV. If omitted and MOOT_CSV_PATH is unset, "
+            "uses --glob / --min-rows discovery instead."
+        ),
     )
     parser.add_argument(
-        "algorithm_id",
-        nargs="?",
+        "--glob",
+        dest="input_glob",
+        default="moot/optimize/**/*.csv",
+        help="When no input CSV is set, discover CSVs with this pattern (default: moot/optimize/**/*.csv).",
+    )
+    parser.add_argument(
+        "--min-rows",
         type=int,
-        default=int(os.environ.get("MOOT_ALGORITHM_ID", "0")),
-        help="Algorithm ID (0=NSGA2, 1=MOEA/D) (or env MOOT_ALGORITHM_ID)",
+        default=1000,
+        help="When using discovery, skip CSVs where len(df) <= this value (default: 10000).",
+    )
+    parser.add_argument(
+        "--algorithm-id",
+        type=int,
+        default=None,
+        help="Run only this algorithm (0..8). Default: run all algorithms.",
+    )
+    parser.add_argument(
+        "--data-roots",
+        nargs="*",
+        default=["moot/behavior_data", "moot/optimize/behavior_data", "."],
+        help="Directories to search for source dataset CSV (for IGD reference).",
+    )
+    parser.add_argument(
+        "--skip-datasets",
+        nargs="*",
+        default=["Marketing_Analytics.csv"],
+        help=(
+            "Extra dataset names to skip: CSV stem(s) or path(s); "
+            "merged with SKIP_DATASETS in pass_1.py."
+        ),
     )
     return parser.parse_args()
 
 
-args = parse_args()
-CSV_PATH = args.csv_file
-ALGORITHM_ID = args.algorithm_id
+def merged_skip_stems(args):
+    stems = {s.lower() for s in SKIP_DATASETS}
+    for x in args.skip_datasets or []:
+        stems.add(Path(x).stem.lower())
+    return stems
 
-df = pd.read_csv(CSV_PATH)
 
-x_cols, y_cols = parse_moot_columns(df)
-X_num, X_cat, num_cols, cat_cols = build_mixed_x(df, x_cols)
-Y_original, Y_pymoo = build_objective_matrix(df, y_cols)
-
-print("Loaded:", CSV_PATH)
-print("Rows:", len(df))
-
-if len(df) < 1000:
-    print(f"Skipping dataset {CSV_PATH} with less than 1000 rows: {len(df)} rows")
-    exit(0)
-
-if len(y_cols) < 2:
-    print(
-        f"Skipping dataset {CSV_PATH} with less than 2 objectives: {len(y_cols)} objectives"
-    )
-    exit(0)
+def path_is_skipped(path, skip_stems):
+    return Path(path).stem.lower() in skip_stems
 
 
 # ---------------------------------
@@ -238,12 +304,6 @@ class MOOTNearestNeighborProblem(Problem):
         out["F"] = self.Y_lookup[nn_idx]
 
 
-problem = MOOTNearestNeighborProblem(X_num, X_cat, Y_pymoo)
-
-ref_dirs = get_reference_directions("das-dennis", problem.n_obj, n_partitions=10)
-pop_size_ref = max(POP_SIZE, len(ref_dirs))
-
-
 def nearest_uniform_n_points(n_obj, target):
     if n_obj <= 1:
         return max(2, target)
@@ -259,81 +319,270 @@ def nearest_uniform_n_points(n_obj, target):
     best = min(values, key=lambda x: (abs(x - target), -x))
     return max(2, int(best))
 
-algorithms = [
-    NSGA2(pop_size=POP_SIZE),
-    MOEAD(
-        ref_dirs=ref_dirs,
-        n_neighbors=max(2, min(15, len(ref_dirs))),
-        prob_neighbor_mating=(0.7 if len(ref_dirs) > 15 else 0.5),
-    ),
-    NSGA3(ref_dirs=ref_dirs, pop_size=pop_size_ref),
-    UNSGA3(ref_dirs=ref_dirs, pop_size=pop_size_ref),
-    RNSGA3(
-        ref_points=ref_dirs[: min(2, len(ref_dirs))],
-        pop_per_ref_point=nearest_uniform_n_points(
-            problem.n_obj,
-            max(2, int(np.ceil(POP_SIZE / max(1, min(2, len(ref_dirs)))))),
-        ),
-    ),
-    RVEA(ref_dirs=ref_dirs, pop_size=pop_size_ref),
-    AGEMOEA(pop_size=POP_SIZE),
-    AGEMOEA2(pop_size=POP_SIZE),
-    CTAEA(ref_dirs=ref_dirs),
-]
 
-if ALGORITHM_ID < 0 or ALGORITHM_ID >= len(algorithms):
-    raise ValueError(
-        f"Invalid algorithm_id={ALGORITHM_ID}. Valid IDs: 0..{len(algorithms)-1}"
+def metrics_summary_row(
+    csv_path: str,
+    data_roots,
+    run_tag: str,
+    out_path: Path,
+    final_rows: pd.DataFrame,
+    merged_rows: int,
+):
+    obj_cols_metrics, maximize_mask_metrics = parse_objective_columns(
+        final_rows.columns
+    )
+    frontier_values = None
+    if obj_cols_metrics and len(final_rows) > 0:
+        fv = to_numeric_objectives(final_rows, obj_cols_metrics)
+        if len(fv) > 0:
+            frontier_values = fv
+
+    if frontier_values is None:
+        return None
+
+    reference_values = None
+    source_path = find_source_csv(Path(csv_path).name, data_roots)
+    if source_path is not None:
+        source_df = pd.read_csv(source_path)
+        if all(c in source_df.columns for c in obj_cols_metrics):
+            source_values = to_numeric_objectives(source_df, obj_cols_metrics)
+            if len(source_values) > 0:
+                source_min = source_values.copy()
+                source_min[:, maximize_mask_metrics] = -source_min[
+                    :, maximize_mask_metrics
+                ]
+                source_nd = non_dominated_mask(source_min)
+                reference_values = source_values[source_nd]
+
+    metrics = calculate_pareto_metrics(
+        frontier=frontier_values,
+        reference_front=reference_values,
+        maximize_mask=maximize_mask_metrics,
+        normalize=True,
     )
 
-algorithm = algorithms[ALGORITHM_ID]
-termination = get_termination("n_gen", N_GEN)
-
-start = time.time()
-res = minimize(
-    problem,
-    algorithm,
-    termination,
-    seed=SEED,
-    verbose=False,
-)
-runtime = time.time() - start
-
-# ---------------------------------
-# Output folder + run tag
-# ---------------------------------
-algorithm_name = algorithm.__class__.__name__
-out_dir = Path("outputs") / algorithm_name
-out_dir.mkdir(parents=True, exist_ok=True)
-run_tag = f"{CSV_PATH.split('\\')[-1].split('.')[0]}"
+    return {
+        "dataset": f"{run_tag}.csv",
+        "input_files": 1,
+        "merged_rows": int(merged_rows),
+        "pareto_rows": int(len(final_rows)),
+        "reference_rows": int(len(reference_values))
+        if reference_values is not None
+        else 0,
+        "hv": metrics["hv"],
+        "spread": metrics["spread"],
+        "igd": metrics["igd"],
+        "mdh": metrics["mdh"],
+        "output_file": str(out_path),
+    }
 
 
-# ---------------------------------
-# Recover nearest real rows for final solutions
-# ---------------------------------
-final_idx = []
+def run_single_dataset(csv_path: str, data_roots, args):
+    df = pd.read_csv(csv_path)
 
-for i in range(res.X.shape[0]):
-    dist = np.zeros(len(df), dtype=np.float32)
+    x_cols, y_cols = parse_moot_columns(df)
+    X_num, X_cat, num_cols, cat_cols = build_mixed_x(df, x_cols)
+    Y_original, Y_pymoo = build_objective_matrix(df, y_cols)
 
-    if X_num is not None:
-        cand_num = res.X[i, : len(num_cols)]
-        dist += ((X_num - cand_num) ** 2).sum(axis=1)
+    print("Loaded:", csv_path)
+    print("Rows:", len(df))
 
-    if X_cat is not None:
-        cand_cat = res.X[i, len(num_cols) :]
-        cand_cat = np.rint(cand_cat).astype(np.int32)
-        dist += (X_cat != cand_cat).sum(axis=1)
+    if len(df) < 1000:
+        print(f"Skipping dataset {csv_path} with less than 1000 rows: {len(df)} rows")
+        return []
 
-    final_idx.append(np.argmin(dist))
+    if len(y_cols) < 2:
+        print(
+            f"Skipping dataset {csv_path} with less than 2 objectives: {len(y_cols)} objectives"
+        )
+        return []
 
-final_idx = np.array(final_idx)
+    problem = MOOTNearestNeighborProblem(X_num, X_cat, Y_pymoo)
 
-final_rows = df.iloc[final_idx].copy().reset_index(drop=True)
+    ref_dirs = get_reference_directions("das-dennis", problem.n_obj, n_partitions=10)
+    pop_size_ref = max(POP_SIZE, len(ref_dirs))
 
-# deduplicate repeated nearest-neighbor picks
-final_rows["_source_row"] = final_idx
-final_rows = final_rows.drop_duplicates(subset=["_source_row"]).reset_index(drop=True)
+    algorithms = [
+        NSGA2(pop_size=POP_SIZE),
+        MOEAD(
+            ref_dirs=ref_dirs,
+            n_neighbors=max(2, min(15, len(ref_dirs))),
+            prob_neighbor_mating=(0.7 if len(ref_dirs) > 15 else 0.5),
+        ),
+        NSGA3(ref_dirs=ref_dirs, pop_size=pop_size_ref),
+        UNSGA3(ref_dirs=ref_dirs, pop_size=pop_size_ref),
+        RNSGA3(
+            ref_points=ref_dirs[: min(2, len(ref_dirs))],
+            pop_per_ref_point=nearest_uniform_n_points(
+                problem.n_obj,
+                max(2, int(np.ceil(POP_SIZE / max(1, min(2, len(ref_dirs)))))),
+            ),
+        ),
+        RVEA(ref_dirs=ref_dirs, pop_size=pop_size_ref),
+        AGEMOEA(pop_size=POP_SIZE, eliminate_duplicates=True),
+        AGEMOEA2(pop_size=POP_SIZE, eliminate_duplicates=True),
+        CTAEA(ref_dirs=ref_dirs),
+    ]
 
-# Store rows and y's together (objectives are columns in final_rows already)
-final_rows.to_csv(out_dir / f"{run_tag}.csv", index=False)
+    if args.algorithm_id is not None:
+        algo_ids = [args.algorithm_id]
+    elif os.environ.get("MOOT_ALGORITHM_ID") is not None:
+        algo_ids = [int(os.environ["MOOT_ALGORITHM_ID"])]
+    else:
+        algo_ids = list(range(len(algorithms)))
+
+    termination = get_termination("n_gen", N_GEN)
+    run_tag = Path(csv_path).stem
+
+    summary_rows = []
+
+    written_dataset_files = []
+
+    for aid in algo_ids:
+        if aid < 0 or aid >= len(algorithms):
+            raise ValueError(
+                f"Invalid algorithm_id={aid}. Valid IDs: 0..{len(algorithms)-1}"
+            )
+
+        algorithm = algorithms[aid]
+        algorithm_name = algorithm.__class__.__name__
+        print(f"\n--- Algorithm {aid}: {algorithm_name} ---")
+
+        out_dir = OUTPUT_ROOT / run_tag
+        out_dir.mkdir(parents=True, exist_ok=True)
+        out_path = out_dir / f"{algorithm_name}.csv"
+
+        if out_path.exists():
+            print(f"Skipping existing output for {run_tag}/{algorithm_name}: {out_path}")
+            try:
+                final_rows = pd.read_csv(out_path)
+                row = metrics_summary_row(
+                    csv_path,
+                    data_roots,
+                    run_tag,
+                    out_path,
+                    final_rows,
+                    merged_rows=len(final_rows),
+                )
+                if row is not None:
+                    summary_rows.append(row)
+            except Exception as exc:
+                print(
+                    f"Warning: could not summarize existing output {out_path}: "
+                    f"{type(exc).__name__}: {exc}"
+                )
+            continue
+
+        try:
+            start = time.time()
+            res = minimize(
+                problem,
+                algorithm,
+                termination,
+                seed=SEED,
+                verbose=False,
+            )
+            runtime = time.time() - start
+
+            final_idx = []
+            for i in range(res.X.shape[0]):
+                dist = np.zeros(len(df), dtype=np.float32)
+
+                if X_num is not None:
+                    cand_num = res.X[i, : len(num_cols)]
+                    dist += ((X_num - cand_num) ** 2).sum(axis=1)
+
+                if X_cat is not None:
+                    cand_cat = res.X[i, len(num_cols) :]
+                    cand_cat = np.rint(cand_cat).astype(np.int32)
+                    dist += (X_cat != cand_cat).sum(axis=1)
+
+                final_idx.append(np.argmin(dist))
+
+            final_idx = np.array(final_idx)
+
+            final_rows = df.iloc[final_idx].copy().reset_index(drop=True)
+
+            final_rows["_source_row"] = final_idx
+            final_rows = final_rows.drop_duplicates(subset=["_source_row"]).reset_index(
+                drop=True
+            )
+
+            final_rows.to_csv(out_path, index=False)
+            written_dataset_files.append(out_path)
+            print(f"Wrote {len(final_rows)} rows -> {out_path} ({runtime:.1f}s)")
+
+            row = metrics_summary_row(
+                csv_path,
+                data_roots,
+                run_tag,
+                out_path,
+                final_rows,
+                merged_rows=int(res.X.shape[0]),
+            )
+            if row is not None:
+                summary_rows.append(row)
+        except Exception as exc:
+            print(
+                f"Discarding dataset {run_tag}: algorithm {algorithm_name} failed with "
+                f"{type(exc).__name__}: {exc}"
+            )
+            for path in written_dataset_files:
+                try:
+                    if path.exists():
+                        path.unlink()
+                        print(f"Removed partial output: {path}")
+                except Exception as cleanup_exc:
+                    print(
+                        f"Warning: failed to remove partial output {path}: "
+                        f"{type(cleanup_exc).__name__}: {cleanup_exc}"
+                    )
+            return []
+
+    return summary_rows
+
+
+def main():
+    args = parse_args()
+    data_roots = args.data_roots
+    OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
+
+    all_summary_rows = []
+
+    skip_stems = merged_skip_stems(args)
+    csv_path = args.csv_file or os.environ.get("MOOT_CSV_PATH")
+    if csv_path is not None:
+        if path_is_skipped(csv_path, skip_stems):
+            print(f"Skipping excluded dataset: {csv_path}")
+        else:
+            all_summary_rows.extend(run_single_dataset(csv_path, data_roots, args))
+        summary_path = OUTPUT_ROOT / "summary.csv"
+        summary = pd.DataFrame(all_summary_rows)
+        summary.to_csv(summary_path, index=False)
+        print(f"Wrote combined summary: {summary_path}")
+        if not summary.empty:
+            print(summary.to_string(index=False))
+        return
+
+    paths = sorted(glob.glob(args.input_glob, recursive=True))
+    for path in paths:
+        if path_is_skipped(path, skip_stems):
+            print(f"Skipping excluded dataset: {path}")
+            continue
+        df_len = len(pd.read_csv(path))
+        if df_len <= args.min_rows:
+            continue
+        print("--------------------------------")
+        all_summary_rows.extend(run_single_dataset(path, data_roots, args))
+        print()
+
+    summary_path = OUTPUT_ROOT / "summary.csv"
+    summary = pd.DataFrame(all_summary_rows)
+    summary.to_csv(summary_path, index=False)
+    print(f"Wrote combined summary: {summary_path}")
+    if not summary.empty:
+        print(summary.to_string(index=False))
+
+
+if __name__ == "__main__":
+    main()

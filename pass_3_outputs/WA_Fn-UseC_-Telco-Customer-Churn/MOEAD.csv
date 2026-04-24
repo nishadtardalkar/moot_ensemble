@@ -1,0 +1,2 @@
+customerID,gender,SeniorCitizen,partner,dependents,tenure,phoneService,multipleLines,internetService,onlineSecurity,onlineBackup,deviceProtection,techSupport,streamingTV,streamingMovies,contract,paperlessBilling,paymentMethod,MonthlyCharges-,TotalCharges-,churn,_source_row
+0761_AETCS,Female,0,No,No,1,Yes,No,No,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,Month_to_month,No,Electronic_check,19.3,19.3,Yes,11

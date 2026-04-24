@@ -1,0 +1,4 @@
+customerID,gender,SeniorCitizen,partner,dependents,tenure,phoneService,multipleLines,internetService,onlineSecurity,onlineBackup,deviceProtection,techSupport,streamingTV,streamingMovies,contract,paperlessBilling,paymentMethod,MonthlyCharges-,TotalCharges-,churn,_source_row
+0620_XEFWH,Male,0,Yes,Yes,4,Yes,No,No,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,Month_to_month,No,Mailed_check,18.85,84.2,No,4
+8464_EETCQ,Male,0,No,No,57,Yes,No,No,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,Two_year,No,Credit_card_(automatic),18.8,1094.35,No,1
+0761_AETCS,Female,0,No,No,1,Yes,No,No,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,Month_to_month,No,Electronic_check,19.3,19.3,Yes,11

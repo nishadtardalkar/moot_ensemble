@@ -1,0 +1,4 @@
+customerID,gender,SeniorCitizen,partner,dependents,tenure,phoneService,multipleLines,internetService,onlineSecurity,onlineBackup,deviceProtection,techSupport,streamingTV,streamingMovies,contract,paperlessBilling,paymentMethod,MonthlyCharges-,TotalCharges-,churn,_source_row
+4760_XOHVN,Female,0,Yes,Yes,1,Yes,No,No,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,Month_to_month,No,Mailed_check,19.45,19.45,Yes,4632
+1218_VKFPE,Female,0,Yes,Yes,12,Yes,No,No,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,Month_to_month,No,Mailed_check,19.0,233.55,Yes,580
+3679_XASPY,Female,0,Yes,Yes,1,Yes,No,No,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,Month_to_month,No,Electronic_check,19.45,19.45,No,101

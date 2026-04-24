@@ -1,0 +1,4 @@
+customerID,gender,SeniorCitizen,partner,dependents,tenure,phoneService,multipleLines,internetService,onlineSecurity,onlineBackup,deviceProtection,techSupport,streamingTV,streamingMovies,contract,paperlessBilling,paymentMethod,MonthlyCharges-,TotalCharges-,churn,_source_row
+7009_PCARS,Male,0,No,Yes,55,Yes,No,No,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,One_year,No,Bank_transfer_(automatic),19.1,1001.5,No,2799
+9046_JBFWA,Male,0,No,Yes,27,Yes,No,No,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,Month_to_month,No,Mailed_check,19.15,537.35,No,988
+0761_AETCS,Female,0,No,No,1,Yes,No,No,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,Month_to_month,No,Electronic_check,19.3,19.3,Yes,2096

@@ -1,0 +1,11 @@
+customerID,gender,SeniorCitizen,partner,dependents,tenure,phoneService,multipleLines,internetService,onlineSecurity,onlineBackup,deviceProtection,techSupport,streamingTV,streamingMovies,contract,paperlessBilling,paymentMethod,MonthlyCharges-,TotalCharges-,churn,_source_row
+8992_CEUEN,Female,0,No,No,1,Yes,No,No,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,Month_to_month,No,Electronic_check,18.85,18.85,No,1151
+4425_OWHWB,Female,0,No,No,20,Yes,No,No,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,One_year,Yes,Credit_card_(automatic),19.35,433.75,No,1971
+5616_PRTNT,Male,0,No,Yes,20,Yes,No,No,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,Month_to_month,Yes,Electronic_check,19.4,374.5,Yes,3700
+5624_RYAMH,Female,0,No,No,9,Yes,No,No,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,Month_to_month,Yes,Electronic_check,19.5,178.85,No,1355
+3981_QSVQI,Male,0,No,No,8,Yes,No,No,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,Month_to_month,Yes,Bank_transfer_(automatic),19.7,168.9,No,2352
+1744_JHKYS,Female,0,Yes,No,34,Yes,Yes,No,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,Month_to_month,No,Electronic_check,24.7,780.2,No,175
+0523_VNGTF,Female,1,No,No,52,No,No_phone_service,DSL,No,Yes,Yes,Yes,Yes,No,Month_to_month,Yes,Electronic_check,50.5,2566.3,No,1862
+9137_NOQKA,Male,1,No,No,2,Yes,No,No,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,Month_to_month,No,Electronic_check,19.2,37.2,No,2553
+6598_RFFVI,Male,0,No,No,2,Yes,No,No,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,One_year,No,Credit_card_(automatic),19.3,28.3,Yes,3790
+1098_TDVUQ,Female,0,No,No,1,Yes,No,No,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,Month_to_month,Yes,Bank_transfer_(automatic),19.25,19.25,No,310

@@ -1,0 +1,4 @@
+MRE-,ACC+,PRED40+,N_estimators,criterion,Min_sample_leaves,Min_impurity_decrease,Max_depth,_source_row
+0.0,0.8813073394495413,0.7142857142857142,180,absolute_error,3,0.0,10,6246
+0.0,0.8689793577981653,0.7857142857142857,190,absolute_error,3,0.0,3,531
+0.0,0.8560779816513763,1.0,100,absolute_error,2,3.75,13,1568

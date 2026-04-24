@@ -1,0 +1,6 @@
+no_asm,no_8x8dct,no_cabac,no_deblock,no_fast_pskip,no_mbtree,no_mixed_refs,no_weightb,rc_lookahead,rc_lookahead_20,rc_lookahead_40,rc_lookahead_60,ref,ref_1,ref_5,ref_9,core,core1,core2,core3,core4,Benchmark-iperf-,Benchmark-cpu-,_source_row
+1,1,1,0,0,0,1,0,1,1,0,0,1,1,0,0,1,0,1,0,0,41.64,46.908804,1046
+1,1,1,0,0,0,0,0,1,1,0,0,1,1,0,0,1,1,0,0,0,78.16,24.89649,1117
+1,1,1,0,0,0,1,0,1,1,0,0,1,1,0,0,1,0,0,0,1,21.556,86.900996,1044
+1,1,1,0,0,0,0,0,1,1,0,0,1,1,0,0,1,0,0,1,0,28.612,68.61138,1119
+1,1,0,0,1,0,1,0,1,0,0,1,1,1,0,0,1,0,0,1,0,31.09,65.741699,1935

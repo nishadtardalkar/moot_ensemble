@@ -1,8 +1,0 @@
-ee_instrument,simplifycfg,ipsccp,called_value_propagation,basicaa,instcombine,inline,mergereturn,jump_threading,pgo_memop_opt,tailcallelim,licm,sink,gvn,sccp,adce,Performance-,Cpu-,_source_row,_source_algorithm,_source_file,_runtime_sec
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,52285.4,25.431538,3,AGEMOEA2,outputs\AGEMOEA2\SS-W.csv,0.042532920837402344
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,52324.8,25.513077,1,AGEMOEA,outputs\AGEMOEA\SS-W.csv,0.042532920837402344
-1,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,57529.0,26.179716,18,RVEA,outputs\RVEA\SS-W.csv,0.042532920837402344
-0,0,0,0,1,0,1,0,0,0,1,0,0,0,0,0,61613.6,25.68394,7,CTAEA,outputs\CTAEA\SS-W.csv,0.042532920837402344
-0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,0,57245.4,25.364561,0,AGEMOEA,outputs\AGEMOEA\SS-W.csv,0.042532920837402344
-0,1,1,0,0,0,1,1,1,1,1,0,1,0,0,0,78859.0,25.532515,4,CTAEA,outputs\CTAEA\SS-W.csv,0.042532920837402344
-0,1,1,0,0,0,0,1,1,1,1,0,1,0,1,0,73876.6,25.34555,15,NSGA3,outputs\NSGA3\SS-W.csv,0.042532920837402344

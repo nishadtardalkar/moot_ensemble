@@ -1,0 +1,3 @@
+country,Year,status,Life expectancy ,Adult Mortality,infant deaths,Alcohol,percentage expenditure,Hepatitis B,Measles , BMI ,under-five deaths ,Polio,Total expenditure,Diphtheria , HIV/AIDS,GDP,Population, thinness  1-19 years, thinness 5-9 years,Income composition of resources+,Schooling+,_source_row
+Australia,2003,Developed,83.0,71.0,1,9.97,3829.550928,95.0,91,6.3,1,92.0,8.32,93.0,0.1,23465.38559,198954.0,0.7,0.7,0.905,20.6,124
+Australia,2015,Developed,82.8,59.0,1,4.602860787,0.0,93.0,74,66.6,1,93.0,5.938189528,93.0,0.1,56554.3876,23789338.0,0.6,0.6,0.937,20.4,112

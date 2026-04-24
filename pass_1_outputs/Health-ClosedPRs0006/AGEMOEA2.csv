@@ -1,0 +1,10 @@
+MRE-,ACC+,PRED40+,N_estimators,criterion,Min_sample_leaves,Min_impurity_decrease,Max_depth,_source_row
+0.0,0.9689339538324035,1.0,20,absolute_error,12,4.5,4,4842
+0.0,0.9689339538324035,1.0,30,absolute_error,20,1.5,12,6808
+0.0,0.9689339538324035,1.0,20,absolute_error,14,3.0,5,6708
+0.0,0.9689339538324035,1.0,10,absolute_error,13,5.5,2,8228
+0.0,0.9689339538324035,1.0,40,absolute_error,9,4.75,5,9898
+0.0,0.9689339538324035,1.0,10,absolute_error,8,4.5,5,8486
+0.0,0.9689339538324035,1.0,10,absolute_error,10,3.75,5,1215
+0.0,0.9689339538324035,1.0,50,absolute_error,11,3.5,4,1317
+0.0,0.9689339538324035,1.0,30,absolute_error,9,2.75,1,7507

@@ -1,0 +1,3 @@
+twoPass,quality,bestQuality,goodQuality,rtQuality,constantBitrate,autoAltRef,noAltRef,allowResize,Threads,TokenParts,ArnrMaxFrames,ArnrStrength,Performance-,Energy-,Cpu-,_source_row
+0,1,0,0,1,1,0,0,1,4,2,5,3,5206.2,256.6,44.298,383
+0,1,0,0,1,1,0,0,1,4,2,15,3,5345.0,245.8,46.142,395

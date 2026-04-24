@@ -1,0 +1,5 @@
+Spouts,Max_spout,Spout_wait,Spliters,Counters,Netty_min_wait,Throughput+,Latency-,_source_row
+1,100,10,2,12,100,22829.0,45.261,2
+3,1000,100,2,12,1000,30962.0,1087.6,1
+1,2,2,3,6,1000,4011.7,4.7038,3
+3,1000,100,3,12,10,34740.0,1130.6,0

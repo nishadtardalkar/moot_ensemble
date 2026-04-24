@@ -1,0 +1,5 @@
+Age,attrition,businessTravel,DailyRate,department,DistanceFromHome,Education,educationField,EmployeeCount,EmployeeNumber,EnvironmentSatisfaction,gender,HourlyRate,JobInvolvement,JobLevel,jobRole,JobSatisfaction,maritalStatus,MonthlyIncome,MonthlyRate,NumCompaniesWorked,over18,overTime,PercentSalaryHike,PerformanceRating,RelationshipSatisfaction,StandardHours,StockOptionLevel,TotalWorkingYears,TrainingTimesLastYear,WorkLifeBalance,YearsAtCompany+,YearsInCurrentRole+,YearsSinceLastPromotion,YearsWithCurrManager+,_source_row
+52,No,Travel_Rarely,699,Research & Development,1,4,Life Sciences,1,259,3,Male,65,2,5,Manager,3,Married,19999,5678,0,Y,No,14,3,1,80,1,34,5,3,33,18,11,9,190
+35,No,Travel_Rarely,607,Research & Development,9,3,Life Sciences,1,880,4,Female,66,2,3,Manufacturing Director,3,Married,10685,23457,1,Y,Yes,20,4,2,80,1,17,2,3,17,14,5,15,635
+43,No,Travel_Frequently,394,Sales,26,2,Life Sciences,1,158,3,Male,92,3,4,Manager,4,Married,16959,19494,1,Y,Yes,12,3,4,80,2,25,3,4,25,12,4,12,119
+51,No,Travel_Frequently,237,Sales,9,3,Life Sciences,1,1282,4,Male,83,3,5,Manager,2,Divorced,19847,19196,4,Y,Yes,24,4,1,80,1,31,5,2,29,10,11,10,918

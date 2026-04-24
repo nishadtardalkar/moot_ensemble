@@ -1,0 +1,5 @@
+customerID,gender,SeniorCitizen,partner,dependents,tenure,phoneService,multipleLines,internetService,onlineSecurity,onlineBackup,deviceProtection,techSupport,streamingTV,streamingMovies,contract,paperlessBilling,paymentMethod,MonthlyCharges-,TotalCharges-,churn,_source_row
+1218_VKFPE,Female,0,Yes,Yes,12,Yes,No,No,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,Month_to_month,No,Mailed_check,19.0,233.55,Yes,580
+1725_MIMXW,Male,0,No,Yes,1,Yes,No,No,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,Month_to_month,Yes,Mailed_check,19.45,19.45,Yes,1319
+6598_RFFVI,Male,0,No,No,2,Yes,No,No,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,One_year,No,Credit_card_(automatic),19.3,28.3,Yes,3790
+9137_NOQKA,Male,1,No,No,2,Yes,No,No,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,No_internet_service,Month_to_month,No,Electronic_check,19.2,37.2,No,2553

@@ -1,0 +1,726 @@
+%%
+%% This is file `sample-sigconf-authordraft.tex',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% samples.dtx  (with options: `all,proceedings,bibtex,authordraft')
+%% 
+%% IMPORTANT NOTICE:
+%% 
+%% For the copyright see the source file.
+%% 
+%% Any modified versions of this file must be renamed
+%% with new filenames distinct from sample-sigconf-authordraft.tex.
+%% 
+%% For distribution of the original source see the terms
+%% for copying and modification in the file samples.dtx.
+%% 
+%% This generated file may be distributed as long as the
+%% original source files, as listed above, are part of the
+%% same distribution. (The sources need not necessarily be
+%% in the same archive or directory.)
+%%
+%%
+%% Commands for TeXCount
+%TC:macro \cite [option:text,text]
+%TC:macro \citep [option:text,text]
+%TC:macro \citet [option:text,text]
+%TC:envir table 0 1
+%TC:envir table* 0 1
+%TC:envir tabular [ignore] word
+%TC:envir displaymath 0 word
+%TC:envir math 0 word
+%TC:envir comment 0 0
+%%
+%% The first command in your LaTeX source must be the \documentclass
+%% command.
+%%
+%% For submission and review of your manuscript please change the
+%% command to \documentclass[manuscript, screen, review]{acmart}.
+%%
+%% When submitting camera ready or to TAPS, please change the command
+%% to \documentclass[sigconf]{acmart} or whichever template is required
+%% for your publication.
+%%
+%%
+\documentclass[sigconf,authorversion,nonacm]{acmart}
+%%
+%% \BibTeX command to typeset BibTeX logo in the docs
+\AtBeginDocument{%
+  \providecommand\BibTeX{{%
+    Bib\TeX}}}
+\usepackage{arydshln}
+\usepackage{nicematrix}
+
+%% Rights management information.  This information is sent to you
+%% when you complete the rights form.  These commands have SAMPLE
+%% values in them; it is your responsibility as an author to replace
+%% the commands and values with those provided to you when you
+%% complete the rights form.
+% \setcopyright{acmlicensed}
+% \copyrightyear{2018}
+% \acmYear{2018}
+% \acmDOI{XXXXXXX.XXXXXXX}
+% %% These commands are for a PROCEEDINGS abstract or paper.
+% \acmConference[Conference acronym 'XX]{Make sure to enter the correct
+%   conference title from your rights confirmation email}{June 03--05,
+%   2018}{Woodstock, NY}
+% %%
+% %%  Uncomment \acmBooktitle if the title of the proceedings is different
+% %%  from ``Proceedings of ...''!
+% %%
+% %%\acmBooktitle{Woodstock '18: ACM Symposium on Neural Gaze Detection,
+% %%  June 03--05, 2018, Woodstock, NY}
+% \acmISBN{978-1-4503-XXXX-X/2018/06}
+
+
+%%
+%% Submission ID.
+%% Use this when submitting an article to a sponsored event. You'll
+%% receive a unique submission ID from the organizers
+%% of the event, and this ID should be used as the parameter to this command.
+%%\acmSubmissionID{123-A56-BU3}
+
+%%
+%% For managing citations, it is recommended to use bibliography
+%% files in BibTeX format.
+%%
+%% You can then either use BibTeX with the ACM-Reference-Format style,
+%% or BibLaTeX with the acmnumeric or acmauthoryear sytles, that include
+%% support for advanced citation of software artefact from the
+%% biblatex-software package, also separately available on CTAN.
+%%
+%% Look at the sample-*-biblatex.tex files for templates showcasing
+%% the biblatex styles.
+%%
+
+%%
+%% The majority of ACM publications use numbered citations and
+%% references.  The command \citestyle{authoryear} switches to the
+%% "author year" style.
+%%
+%% If you are preparing content for an event
+%% sponsored by ACM SIGGRAPH, you must use the "author year" style of
+%% citations and references.
+%% Uncommenting
+%% the next command will enable that style.
+%%\citestyle{acmauthoryear}
+\newcommand{\bai}[1]{{
+ 		{\color{red}\noindent\textbf{BC:}
+ 			\emph{#1}
+ 		}\normalcolor}}
+
+%%
+%% end of the preamble, start of the body of the document source.
+\begin{document}
+
+%%
+%% The "title" command has an optional parameter,
+%% allowing the author to define a "short title" to be used in page headers.
+\title{Ensemble Multi-Objective Optimization on MOOT Datasets \vspace{0.5em} \\ \large CSC591 Team 8 \vspace{1.5em}}
+
+%%
+%% The "author" command and its associated commands are used to define
+%% the authors and their affiliations.
+%% Of note is the shared affiliation of the first two authors, and the
+%% "authornote" and "authornotemark" commands
+%% used to denote shared contribution to the research.
+
+\author{Bhavana Chappidi}
+\affiliation{
+  \institution{}
+  \city{}
+  \country{}
+ }
+\email{bchappi@ncsu.edu}
+
+\author{Nishad Tardalkar}
+\affiliation{
+  \institution{}
+  \city{}
+  \country{}
+}
+\email{ntardal@ncsu.edu}
+
+
+
+%%
+%% By default, the full list of authors will be used in the page
+%% headers. Often, this list is too long, and will overlap
+%% other information printed in the page headers. This command allows
+%% the author to define a more concise list
+%% of authors' names for this purpose.
+\renewcommand{\shortauthors}{P08 CSC 591 SWEAI Project}
+
+
+\maketitle
+
+
+\settopmatter{printacmref=false}
+\renewcommand\footnotetextcopyrightpermission[1]{}
+
+
+
+\section{Introduction}
+
+Many real-world problems in software engineering involve balancing multiple 
+conflicting objectives. For example, a system configuration may need to 
+maximize performance while minimizing energy consumption, memory usage, 
+or operational cost. Similarly, machine learning systems often require 
+trade-offs between model accuracy, training time, and computational 
+resources. These types of problems cannot be effectively solved using 
+single-objective optimization techniques because improving one objective 
+often leads to worsening another.
+
+Multi-objective optimization (MOO) provides a framework for solving such 
+problems. Instead of producing a single optimal solution, MOO algorithms 
+generate a set of trade-off solutions known as the Pareto frontier. Each 
+solution on the Pareto frontier represents a different compromise among 
+objectives, and none of these solutions is strictly better than another 
+across all objectives.
+
+Over the past two decades, many multi-objective optimization algorithms 
+have been developed. Examples include NSGA-II~\cite{deb2002nsga2}, MOEA/D~\cite{zhang2007moead}, 
+and other evolutionary algorithms that explore large search spaces and attempt 
+to approximate the Pareto frontier. Frameworks such as \textit{pymoo}~\cite{blank2020pymoo} 
+provide implementations of these algorithms and allow researchers to evaluate them 
+on a variety of optimization problems.
+
+Despite the large number of available algorithms, most prior work 
+evaluates them individually. Researchers typically select a single 
+algorithm, run it on a dataset, and analyze the results. However, 
+different algorithms often explore the search space in different ways. 
+As a result, each algorithm may discover different regions of the Pareto 
+frontier.
+
+In machine learning and predictive modeling, combining multiple models 
+into an ensemble has often been shown to improve performance. Ensemble methods leverage the strengths of multiple models to produce more robust 
+and accurate results than any single model alone~\cite{dietterich2000ensemble}. 
+A similar idea may be applicable to multi-objective optimization.
+
+This project investigates whether combining the final Pareto frontiers 
+produced by multiple optimization algorithms can lead to better 
+approximations of the true Pareto frontier. Specifically, we examine 
+whether pooling the solutions found by different algorithms and removing 
+dominated solutions can create a stronger overall frontier than the 
+results produced by any individual algorithm.
+
+\section{Research Questions}
+
+The primary goal of this study is to explore whether ensemble techniques 
+can improve multi-objective optimization results in the context of 
+software engineering datasets.
+
+The main research question is:
+
+\textbf{RQ:} Can an ensemble of multi-objective optimization algorithms, 
+formed by pooling their final Pareto frontiers, outperform individual 
+algorithms on software engineering datasets?
+
+To better understand this question, the study also investigates several 
+supporting questions:
+
+\begin{itemize}
+\item Do different optimization algorithms discover different regions 
+of the Pareto frontier?
+\item Does combining Pareto fronts from multiple algorithms improve 
+performance metrics such as hypervolume and spread?
+\item Can solutions obtained from an ensemble Pareto frontier improve 
+optimization performance when used as initialization for another algorithm?
+\end{itemize}
+
+\section{Contributions}
+
+This study makes several contributions to the study of search-based 
+software engineering and multi-objective optimization:
+
+\begin{itemize}
+\item An empirical comparison of several multi-objective optimization 
+algorithms on software engineering datasets.
+
+\item An investigation into whether combining the final Pareto frontiers 
+of multiple algorithms can produce higher quality solutions than those 
+generated by individual algorithms.
+
+\item An experimental evaluation of ensemble-based initialization, 
+where solutions obtained from combined Pareto fronts are used to seed 
+future optimization runs.
+
+\item A reproducible experimental framework implemented using the 
+pymoo optimization library and datasets from the MOOT repository~\cite{menzies2025moot}.
+\end{itemize}
+
+\section{Background}
+
+\subsection{Literature Overview}
+
+Multi-objective optimization has been widely studied across a variety of domains, 
+including engineering design, energy systems, and machine learning. Prior work 
+has focused on developing optimization algorithms, benchmarking their performance, 
+and analyzing evaluation metrics. However, most studies evaluate algorithms 
+individually rather than considering how their outputs might be combined.
+
+\subsection{Multi-Objective Optimization}
+
+Multi-objective optimization refers to problems that contain multiple 
+objectives that must be optimized simultaneously. In many real-world 
+scenarios, these objectives conflict with one another. For example, 
+improving system performance may require additional hardware resources, 
+which increases cost.
+
+Instead of searching for a single optimal solution, multi-objective 
+optimization algorithms aim to identify a set of solutions that represent 
+different trade-offs between objectives. These solutions form what is 
+known as the Pareto frontier.
+
+\subsection{Pareto Dominance}
+
+A solution is considered \textit{Pareto dominated} if another solution 
+exists that performs at least as well in all objectives and strictly 
+better in at least one objective. Solutions that are not dominated by 
+any other solutions are called \textit{non-dominated}. The collection of 
+these non-dominated solutions forms the Pareto frontier.
+
+Pareto frontiers provide decision-makers with a range of choices. 
+Instead of relying on a single optimal configuration, practitioners 
+can examine multiple trade-off solutions and select the one that best 
+matches their priorities.
+
+\subsection{Evolutionary Multi-Objective Algorithms}
+
+Many multi-objective optimization algorithms are based on evolutionary 
+search techniques. These algorithms maintain a population of candidate 
+solutions and iteratively improve them using operations such as mutation, 
+selection, and crossover.
+
+Algorithms such as NSGA-II~\cite{deb2002nsga2} and MOEA/D~\cite{zhang2007moead} 
+are widely used because they maintain diverse populations and encourage 
+exploration of different regions of the search space. These algorithms attempt to approximate the 
+true Pareto frontier by evolving solutions over multiple generations.
+
+
+\subsection{Evaluation Metrics}
+
+Several metrics have been proposed to evaluate the quality of Pareto 
+frontiers~\cite{riquelme2015metrics,audet2021performance}. In this study, 
+we use four metrics to evaluate both convergence and diversity of solutions.
+
+\textbf{Hypervolume (HV)} measures the volume of objective space dominated 
+by the solutions in the Pareto frontier~\cite{shang2020hypervolume}. A larger 
+hypervolume indicates better coverage of the objective space and closer 
+approximation to the optimal frontier.
+
+\textbf{Inverted Generational Distance (IGD)} measures the average distance 
+from a set of reference Pareto-optimal solutions to the obtained frontier. 
+Lower IGD values indicate that the solutions are closer to the reference 
+Pareto front, reflecting better convergence.
+
+\textbf{Spread} measures how evenly distributed the solutions are along the 
+Pareto frontier. In this study, spread is computed as the mean pairwise 
+distance between solutions, providing an indication of diversity across 
+the objective space.
+
+\textbf{Mean Distance to Heaven (MDH)} measures the distance of solutions 
+to an ideal point, where all objectives are optimized. Lower MDH values 
+indicate solutions that are closer to the ideal trade-off.
+
+All objectives are normalized prior to evaluation. Hypervolume is computed 
+using a reference point slightly outside the normalized space, which may 
+result in values greater than 1. These values remain comparable within 
+each dataset.
+
+\subsection{A Gap in the Literature}
+
+To better understand how prior work evaluates multi-objective optimization 
+algorithms, we conducted a literature search in March 2026 using the query 
+``multi-objective optimization'' in Google Scholar. This broad query was 
+chosen to capture influential papers across different domains without 
+restricting results to specific algorithms or applications.
+
+The top 100 papers were collected and ranked by citation count. Following 
+common bibliometric practice, we identified the ``knee'' of the citation 
+curve, defined as the point furthest from the line connecting the most and 
+least cited papers. The knee occurred at rank 13, corresponding to papers 
+with at least 627 citations. These highly cited papers were then analyzed 
+in detail to identify common patterns in the literature.
+
+\subsection{Citation Analysis}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\linewidth]{knee_graph.png}
+\caption{Citation counts of the top 100 papers ranked by citation count. The knee occurs at rank 13.}
+\end{figure}
+
+The knee point represents a natural cutoff between the most influential 
+papers and the remainder of the literature. We focus on these above-knee 
+papers to understand dominant research directions.
+
+\subsection{Classification of Prior Work}
+
+From the above-knee papers, we identified five key properties used to 
+characterize prior work:
+
+\begin{itemize}
+    \item \textbf{Optimization framework:} Some studies use frameworks such 
+    as pymoo~\cite{blank2020pymoo} and PlatEMO~\cite{tian2017platemo}, which 
+    allow multiple algorithms to be evaluated within a single environment. 
+    However, these studies focus on comparing individual algorithms rather 
+    than combining their outputs.
+
+    \item \textbf{SE datasets:} Most studies rely on synthetic benchmark 
+    functions or domain-specific datasets outside software engineering, 
+    such as energy optimization~\cite{cui2017energy} or wireless sensor 
+    networks~\cite{fei2016wsn}. Very few evaluate algorithms on diverse 
+    software engineering datasets.
+
+    \item \textbf{$\geq$5 optimization problems:} Many studies evaluate 
+    algorithms on only a small number of problems. While some benchmarking 
+    frameworks consider larger suites, these are typically synthetic rather 
+    than real-world SE tasks.
+
+    \item \textbf{Performance metrics:} Metrics such as hypervolume and 
+    spread are widely used~\cite{riquelme2015metrics,emmerich2018tutorial}, 
+    but they are rarely applied together across a large and diverse set of 
+    problems.
+
+    \item \textbf{Algorithm ensembles:} Very few studies combine multiple 
+    multi-objective algorithms. Some work applies MOEAs to ensemble learning 
+    in machine learning~\cite{chandra2006ensemble,minku2013effort}, and one 
+    study combines multiple MOEAs on synthetic benchmarks~\cite{zhou2017ensemble}, 
+    but none evaluates ensembles on software engineering datasets.
+\end{itemize}
+
+\subsection{Venn Analysis of Prior Work}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.6\linewidth]{venn_diagram.png}
+\caption{Overlap of five key properties in prior work. No paper satisfies all properties simultaneously.}
+\end{figure}
+
+The overlap of these five properties reveals a clear gap in the literature. 
+No prior work satisfies all five properties simultaneously, particularly 
+the combination of algorithm ensembles evaluated on diverse software 
+engineering datasets.
+
+\subsection{Comparison of Prior Work}
+
+\begin{table*}[h]
+\centering
+\caption{Summary of above-knee papers and their properties.}
+\begin{tabular}{lcccccc}
+\hline
+Paper & Framework? & SE Data? & $\geq$5 Problems? & Metrics? & Ensemble? \\
+\hline
+Deb (2016) & $\times$ & $\times$ & -- & -- & $\times$ \\
+Blank (2020) & $\checkmark$ & $\times$ & $\checkmark$ & $\checkmark$ & $\times$ \\
+Tian (2017) & $\checkmark$ & $\times$ & $\checkmark$ & $\checkmark$ & $\times$ \\
+Sener (2018) & $\times$ & $\times$ & -- & -- & $\times$ \\
+Gunantara (2018) & $\times$ & $\times$ & $\times$ & $\checkmark$ & $\times$ \\
+Emmerich (2018) & $\times$ & $\times$ & $\times$ & $\checkmark$ & $\times$ \\
+Mirjalili (2018) & $\times$ & $\times$ & $\checkmark$ & $\checkmark$ & $\times$ \\
+Mirjalili (2017) & $\times$ & $\times$ & $\checkmark$ & $\checkmark$ & $\times$ \\
+Cui (2017) & $\times$ & $\times$ & -- & -- & $\times$ \\
+Li (2018) & $\times$ & $\times$ & $\checkmark$ & $\checkmark$ & $\times$ \\
+Riquelme (2015) & $\times$ & $\times$ & -- & $\checkmark$ & $\times$ \\
+Tian (2020) & $\times$ & $\times$ & -- & $\checkmark$ & $\times$ \\
+Fei (2016) & $\times$ & $\times$ & -- & $\checkmark$ & $\times$ \\
+\textbf{This Work} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
+\hline
+\end{tabular}
+\end{table*}
+
+From this analysis, we observe that no prior work satisfies all five 
+properties simultaneously. In particular, no study combines multiple 
+multi-objective algorithms as an ensemble while evaluating them on a 
+diverse set of software engineering datasets. This gap motivates the 
+proposed study.
+
+\section{Motivation}
+
+Although many optimization algorithms have been proposed, selecting the 
+best algorithm for a particular problem remains challenging. Each 
+algorithm uses different strategies to explore the search space and 
+maintain diversity among candidate solutions.
+
+Because of these differences, algorithms may discover different parts 
+of the Pareto frontier. For example, one algorithm may perform well in 
+regions that emphasize one objective, while another algorithm may 
+identify solutions that prioritize different objectives.
+
+If these algorithms produce complementary results, combining their 
+solutions could potentially lead to a more complete approximation of 
+the Pareto frontier. This idea is similar to ensemble learning in machine learning, where multiple 
+models are combined to improve overall prediction performance~\cite{dietterich2000ensemble}. 
+Similar concepts have also been explored in multi-objective optimization~\cite{chandra2006ensemble}.
+
+Despite the success of ensemble methods in other areas of computer 
+science, relatively little research has explored ensemble techniques 
+in multi-objective optimization, particularly for software engineering 
+datasets. This gap motivates the investigation conducted in this study.
+
+\section{Methods}
+
+\subsection{Variables}
+
+The independent variable in this study is the optimization algorithm 
+used to generate Pareto frontiers. Multiple algorithms available in 
+the pymoo framework will be evaluated.
+
+The dependent variables are performance metrics used to measure the 
+quality of the resulting Pareto frontiers. These metrics include 
+hypervolume and spread, which measure convergence and diversity.
+
+\subsection{Dataset Selection}
+
+Datasets used in this study are obtained from the MOOT repository, 
+which contains a collection of multi-objective optimization tasks 
+derived from software engineering problems. These datasets include 
+problems related to system configuration, hyperparameter tuning, 
+and project decision-making tasks.
+
+The use of real software engineering datasets ensures that the 
+experimental results reflect practical optimization challenges 
+rather than purely synthetic benchmark problems.
+
+For this study, we used 69 datasets after applying consistency filters: 
+each dataset must contain at least 1000 rows and at least 2 objective 
+columns (identified by the MOOT +/- objective naming convention).
+
+
+\subsection{Experimental Methodology}
+
+The experimental process is structured into three stages, referred to 
+as Pass 1, Pass 2, and Pass 3. Each stage builds upon the previous one 
+to evaluate the effectiveness of ensemble-based optimization.
+
+\subsubsection{Pass 1: Individual Optimization}
+
+In the first stage, each optimization algorithm is run independently 
+on each dataset. The output of each run is a Pareto frontier representing 
+a set of non-dominated solutions.
+
+We evaluate nine multi-objective algorithms from \textit{pymoo}: NSGA-II, 
+MOEA/D, NSGA-III, UNSGA-III, RNSGA-III, RVEA, AGEMOEA, AGEMOEA2, and CTAEA.
+
+This stage allows us to evaluate how different algorithms perform 
+individually and to observe differences in the regions of the solution 
+space that each algorithm explores.
+
+\subsubsection{Pass 2: Ensemble Frontier Construction}
+
+In the second stage, the Pareto frontiers produced by all algorithms 
+are combined into a single set of candidate solutions. From this combined 
+set, dominated solutions are removed to produce an ensemble Pareto frontier.
+
+This ensemble frontier represents the union of solutions discovered 
+by multiple algorithms and is intended to provide a more complete 
+approximation of the Pareto front.
+
+\subsubsection{Pass 3: Ensemble-Derived Initialization}
+
+In the third stage, the Pareto frontiers produced by multiple algorithms 
+are combined and dominated solutions are removed to form a unified 
+ensemble frontier. These solutions are then used as seed data to 
+initialize a single optimization algorithm.
+
+Unlike Pass 1, which begins with random initialization, this stage 
+leverages solutions discovered in earlier stages. This allows us to 
+evaluate whether ensemble-derived initialization can improve 
+optimization performance compared to standard random initialization.
+
+\section{Data Analysis}
+
+The performance of each algorithm and ensemble configuration will be 
+evaluated using commonly used multi-objective optimization metrics.
+
+Hypervolume will be used to measure how much of the objective space is 
+covered by the Pareto frontier. Higher hypervolume values indicate that 
+the solutions dominate a larger region of the objective space and are 
+closer to the optimal frontier.
+
+Spread will be used to evaluate the diversity of solutions along the 
+Pareto frontier. A good Pareto frontier should include solutions that 
+cover a wide range of trade-offs across the objective space.
+
+Inverted Generational Distance (IGD) will be used to measure how close 
+the obtained frontier is to a reference frontier. Lower IGD indicates 
+better convergence toward the best known trade-off surface.
+
+Mean Distance to Heaven (MDH) will be used to measure how close solutions 
+are to the ideal point in objective space. Lower MDH indicates better 
+overall objective quality relative to the ideal target.
+
+By comparing these metrics across multiple algorithms and ensemble 
+configurations, we can determine whether combining Pareto frontiers 
+improves optimization performance on software engineering datasets.
+
+
+\section{Results}
+
+The experimental results show that no single optimization algorithm 
+consistently outperforms all others across all datasets and evaluation 
+metrics. Instead, different algorithms perform best depending on the 
+specific metric being considered.
+
+The percentages reported in this section are computed as pairwise win rates 
+against Pass~1 results. For a metric $m$, we define:
+\[
+\text{Better\%}_m = 100 \times \frac{W_m}{N_m},
+\]
+where $W_m$ is the number of valid pairwise comparisons in which the evaluated 
+method is better than the corresponding Pass~1 result, and $N_m$ is the total 
+number of valid pairwise comparisons for metric $m$. For HV and Spread, 
+``better'' means higher value; for IGD and MDH, ``better'' means lower value.
+
+Table~\ref{tab:pass2-vs-pass1} summarizes Pass~2 (ensemble frontier) against 
+Pass~1 (individual algorithms), using percentage of pairwise wins over all 
+dataset-algorithm comparisons. Pass~2 is strongly better on HV ($80.27\%$) 
+and IGD ($91.57\%$), and also better on Spread ($62.08\%$) and MDH ($50.77\%$). 
+This indicates that combining fronts improves both convergence-oriented metrics 
+and diversity for a majority of comparisons.
+
+\begin{table}[h]
+\centering
+\caption{Pass~2 vs Pass~1: Percent of comparisons where Pass~2 is better (HV/Spread higher; IGD/MDH lower).}
+\label{tab:pass2-vs-pass1}
+\begin{tabular}{lcccc}
+\hline
+Method & HV (\%) & Spread (\%) & IGD (\%) & MDH (\%) \\
+\hline
+Pass~2 Ensemble & 80.27 & 62.08 & 91.57 & 50.77 \\
+\hline
+\end{tabular}
+\end{table}
+
+For Pass~3 (ensemble-derived initialization), Table~\ref{tab:pass3-vs-pass1} 
+reports the same comparison per algorithm. No single algorithm dominates all 
+metrics: RVEA has the highest HV ($87.18\%$) and MDH ($73.68\%$) win rates, 
+AGEMOEA has the highest IGD win rate ($84.62\%$), and RNSGA3 has the highest 
+Spread win rate ($83.45\%$). This reinforces that different algorithms provide 
+different strengths after ensemble-based refinement.
+
+\begin{table*}[h]
+\centering
+\caption{Pass~3 vs Pass~1: Percent of comparisons where each Pass~3 algorithm is better (HV/Spread higher; IGD/MDH lower).}
+\label{tab:pass3-vs-pass1}
+\begin{tabular}{lcccc}
+\hline
+Algorithm & HV (\%) & Spread (\%) & IGD (\%) & MDH (\%) \\
+\hline
+AGEMOEA  & 74.02 & 67.48 & \textbf{84.62} & 40.51 \\
+AGEMOEA2 & 72.48 & 65.61 & 84.44 & 41.54 \\
+CTAEA    & 73.23 & 69.06 & 84.01 & 47.81 \\
+MOEAD    & 44.05 & 42.27 & 42.26 & 53.97 \\
+NSGA2    & 70.37 & 70.53 & 83.84 & 43.43 \\
+NSGA3    & 69.57 & 73.27 & 78.80 & 49.06 \\
+RNSGA3   & 32.69 & \textbf{83.45} & 35.68 & 41.03 \\
+RVEA     & \textbf{87.18} & 40.30 & 81.20 & \textbf{73.68} \\
+UNSGA3   & 69.91 & 73.83 & 79.66 & 50.77 \\
+\hline
+\end{tabular}
+\end{table*}
+
+Overall, these results support the main hypothesis that ensemble information 
+is useful: Pass~2 provides strong gains across all four metrics, and Pass~3 
+further improves outcomes in algorithm-specific ways rather than with a single 
+universally best optimizer.
+
+\section{Discussion}
+
+The results demonstrate that multi-objective optimization algorithms 
+exhibit different strengths depending on the evaluation metric and 
+dataset. No single algorithm consistently dominates across all 
+experiments, which aligns with the No Free Lunch theorem for optimization~\cite{wolpert1997nfl}.
+
+This variability suggests that algorithms are not redundant, but rather 
+complementary. Each algorithm tends to discover different regions of the 
+Pareto frontier, emphasizing different trade-offs among objectives.
+
+The ensemble method benefits from this complementarity by combining 
+solutions from multiple algorithms. By pooling Pareto frontiers and 
+removing dominated solutions, the ensemble is able to construct a more 
+complete approximation of the solution space.
+
+However, the effectiveness of the ensemble approach varies across 
+datasets. While some datasets show clear improvements, others show only 
+minor gains. This indicates that the success of ensemble optimization 
+may depend on factors such as dataset size, dimensionality, and the 
+complexity of the objective landscape.
+
+The refinement stage further highlights this behavior. While 
+initialization using ensemble-derived solutions can improve performance 
+in some cases, it does not universally outperform standard initialization 
+methods.
+
+\section{Threats to Validity}
+
+Several limitations should be considered when interpreting the results 
+of this study.
+
+First, the reference Pareto front used for evaluation is approximated 
+from available data and may not represent the true optimal frontier. 
+This may affect metrics such as IGD.
+
+Second, the spread metric used in this study is implemented as the mean 
+pairwise distance between solutions, which differs from standard spread 
+metrics used in the literature.
+
+Third, the refinement stage operates only on solutions discovered during 
+earlier optimization stages and does not explore the full search space. 
+This limits its ability to discover entirely new regions of the Pareto 
+frontier.
+
+Finally, the results may be sensitive to parameter choices such as 
+population size, number of generations, and random seed. Different 
+parameter settings could lead to different outcomes.
+
+\section{Future Work}
+
+A natural next step is to optimize each individual algorithm used in 
+Pass~1 with automated hyperparameter optimization methods such as SMAC. 
+In this study, all algorithms were run with a common default configuration, 
+which supports fair comparison but may not reflect each algorithm's best 
+possible performance on each dataset. Per-algorithm tuning could produce 
+stronger Pass~1 frontiers, which would in turn provide higher-quality 
+inputs to the ensemble stages.
+
+Improving the quality of Pass~1 frontiers is likely to improve Pass~3 as 
+well, since Pass~3 depends on the combined frontier produced by earlier 
+stages. Better initial fronts can improve both convergence and diversity 
+during refinement, potentially yielding stronger final Pareto solutions.
+
+Another direction is to separate algorithm selection decisions across stages. 
+The best set of algorithms for Pass~1 (maximizing complementary frontier 
+coverage) may not be the same as the best choice for Pass~3 refinement 
+(maximizing improvement given seeded initialization). Future work can study 
+stage-specific portfolios, where one algorithm subset is chosen for Pass~1 
+and a different subset is chosen for Pass~3 based on metric-specific goals.
+
+\section{Conclusion}
+
+This paper investigated the use of ensemble techniques for multi-objective 
+optimization on software engineering datasets. The results show that no 
+single algorithm consistently dominates across all metrics and datasets. 
+Instead, different algorithms excel in different aspects of optimization, 
+indicating that they explore distinct regions of the solution space.
+
+By combining Pareto frontiers from multiple algorithms, the ensemble 
+approach leverages this complementarity to produce improved results in 
+several cases. While the ensemble does not universally outperform all 
+individual algorithms, it often provides a more balanced and robust 
+approximation of the Pareto frontier.
+
+These findings suggest that ensemble-based optimization is a promising 
+direction for future research in search-based software engineering. 
+Future work could explore adaptive ensemble methods and investigate how 
+dataset characteristics influence the effectiveness of ensemble 
+approaches.
+
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{references}
+
+\end{document}

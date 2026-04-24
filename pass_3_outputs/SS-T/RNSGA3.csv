@@ -1,0 +1,4 @@
+encryption,compression,compressionBzip2,compressionGzip,compressionLzo,compressionZpaq,compressionLzma,unlimitedWindowSize,disableCompressibilityTesting,Level,ProcessorCount,MaxRam,Performance-,Benchmark-cpu-,_source_row
+0,1,0,0,1,0,0,0,0,2,2,18,9772.8,45.010889,10
+1,1,0,1,0,0,0,0,1,1,1,18,28054.2,30.017143,18
+1,1,0,0,0,1,0,1,0,8,1,18,1651986.2,25.327496,75
