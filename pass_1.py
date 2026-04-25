@@ -59,6 +59,14 @@ def find_source_csv(dataset_filename, search_roots):
     return None
 
 
+def normalize_dataset_name(dataset_value):
+    return Path(str(dataset_value)).stem
+
+
+def parse_algorithm_name(path_value):
+    return Path(str(path_value)).stem
+
+
 def to_numeric_objectives(df, obj_cols):
     out = df[obj_cols].copy()
     for c in obj_cols:
@@ -226,6 +234,30 @@ def parse_args():
             "merged with SKIP_DATASETS in pass_1.py."
         ),
     )
+    parser.add_argument(
+        "--compare-algorithm",
+        default=None,
+        help=(
+            "Optional algorithm name (e.g., NSGA2) to compare against all other pass_1 "
+            "algorithms using pass_3-style pairwise better-percentage metrics."
+        ),
+    )
+    parser.add_argument(
+        "--comparison-only",
+        action="store_true",
+        help=(
+            "Only run comparison from an existing pass_1 summary CSV. "
+            "Skips all optimization runs."
+        ),
+    )
+    parser.add_argument(
+        "--summary-path",
+        default=None,
+        help=(
+            "Summary CSV to use for --comparison-only "
+            "(default: pass_1_outputs/summary.csv)."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -362,6 +394,7 @@ def metrics_summary_row(
     )
 
     return {
+        "algorithm": parse_algorithm_name(out_path),
         "dataset": f"{run_tag}.csv",
         "input_files": 1,
         "merged_rows": int(merged_rows),
@@ -375,6 +408,180 @@ def metrics_summary_row(
         "mdh": metrics["mdh"],
         "output_file": str(out_path),
     }
+
+
+def compare_pass1_algorithm_vs_others(
+    pass1_summary: pd.DataFrame, target_algorithm: str
+):
+    """
+    For one pass_1 algorithm, compute percent-better metrics against all other
+    pass_1 algorithms on the same datasets:
+    - hv_better_pct: target hv is higher
+    - spread_better_pct: target spread is higher
+    - igd/mdh_better_pct: target is lower
+    """
+    required_cols = {"dataset", "hv", "spread", "igd", "mdh", "output_file"}
+    if not required_cols.issubset(set(pass1_summary.columns)):
+        raise ValueError(
+            "pass_1 summary must contain 'dataset', 'hv', 'spread', 'igd', "
+            "'mdh', and 'output_file' columns."
+        )
+
+    p1 = pass1_summary.copy()
+    if "algorithm" not in p1.columns:
+        p1["algorithm"] = p1["output_file"].map(parse_algorithm_name)
+
+    p1["dataset_key"] = p1["dataset"].map(normalize_dataset_name)
+    p1["hv"] = pd.to_numeric(p1["hv"], errors="coerce")
+    p1["spread"] = pd.to_numeric(p1["spread"], errors="coerce")
+    p1["igd"] = pd.to_numeric(p1["igd"], errors="coerce")
+    p1["mdh"] = pd.to_numeric(p1["mdh"], errors="coerce")
+
+    target_rows = p1[p1["algorithm"] == target_algorithm]
+    if target_rows.empty:
+        return pd.DataFrame(
+            [
+                {
+                    "algorithm": target_algorithm,
+                    "hv_better_pct": np.nan,
+                    "spread_better_pct": np.nan,
+                    "igd_better_pct": np.nan,
+                    "mdh_better_pct": np.nan,
+                    "comparisons": 0,
+                }
+            ]
+        )
+
+    hv_better_total = 0
+    spread_better_total = 0
+    igd_better_total = 0
+    mdh_better_total = 0
+    hv_cmp_total = 0
+    spread_cmp_total = 0
+    igd_cmp_total = 0
+    mdh_cmp_total = 0
+
+    for _, row in target_rows.iterrows():
+        dataset_rows = p1[p1["dataset_key"] == row["dataset_key"]]
+        others = dataset_rows[dataset_rows["algorithm"] != target_algorithm]
+
+        other_hv = others["hv"].dropna()
+        other_spread = others["spread"].dropna()
+        other_igd = others["igd"].dropna()
+        other_mdh = others["mdh"].dropna()
+        if other_hv.empty or other_spread.empty or other_igd.empty or other_mdh.empty:
+            continue
+
+        if pd.isna(row["hv"]) or pd.isna(row["spread"]) or pd.isna(row["igd"]) or pd.isna(row["mdh"]):
+            continue
+
+        hv_cmp_total += int(len(other_hv))
+        spread_cmp_total += int(len(other_spread))
+        igd_cmp_total += int(len(other_igd))
+        mdh_cmp_total += int(len(other_mdh))
+        hv_better_total += int((row["hv"] > other_hv).sum())
+        spread_better_total += int((row["spread"] > other_spread).sum())
+        igd_better_total += int((row["igd"] < other_igd).sum())
+        mdh_better_total += int((row["mdh"] < other_mdh).sum())
+
+    comparisons = min(hv_cmp_total, spread_cmp_total, igd_cmp_total, mdh_cmp_total)
+    if comparisons == 0:
+        return pd.DataFrame(
+            [
+                {
+                    "algorithm": target_algorithm,
+                    "hv_better_pct": np.nan,
+                    "spread_better_pct": np.nan,
+                    "igd_better_pct": np.nan,
+                    "mdh_better_pct": np.nan,
+                    "comparisons": 0,
+                }
+            ]
+        )
+
+    return pd.DataFrame(
+        [
+            {
+                "algorithm": target_algorithm,
+                "hv_better_pct": float(100.0 * hv_better_total / hv_cmp_total),
+                "spread_better_pct": float(
+                    100.0 * spread_better_total / spread_cmp_total
+                ),
+                "igd_better_pct": float(100.0 * igd_better_total / igd_cmp_total),
+                "mdh_better_pct": float(100.0 * mdh_better_total / mdh_cmp_total),
+                "comparisons": int(comparisons),
+            }
+        ]
+    )
+
+
+def compare_all_pass1_algorithms_vs_others(pass1_summary: pd.DataFrame):
+    p1 = pass1_summary.copy()
+    if "algorithm" not in p1.columns:
+        if "output_file" not in p1.columns:
+            raise ValueError(
+                "pass_1 summary must contain either 'algorithm' or 'output_file' column."
+            )
+        p1["algorithm"] = p1["output_file"].map(parse_algorithm_name)
+
+    algorithms = sorted(a for a in p1["algorithm"].dropna().unique())
+    if not algorithms:
+        return pd.DataFrame(
+            columns=[
+                "algorithm",
+                "hv_better_pct",
+                "spread_better_pct",
+                "igd_better_pct",
+                "mdh_better_pct",
+                "comparisons",
+            ]
+        )
+
+    rows = [
+        compare_pass1_algorithm_vs_others(pass1_summary, algorithm)
+        for algorithm in algorithms
+    ]
+    return pd.concat(rows, ignore_index=True)
+
+
+def write_summary_and_optional_comparison(summary, args):
+    summary_path = OUTPUT_ROOT / "summary.csv"
+    summary.to_csv(summary_path, index=False)
+    print(f"Wrote combined summary: {summary_path}")
+    if not summary.empty:
+        print(summary.to_string(index=False))
+
+    if args.compare_algorithm:
+        comparison = compare_pass1_algorithm_vs_others(summary, args.compare_algorithm)
+        comparison_path = OUTPUT_ROOT / "comparison_vs_other_algorithms.csv"
+        comparison.to_csv(comparison_path, index=False)
+        print(f"Wrote pass_1 algorithm comparison: {comparison_path}")
+        print(comparison.to_string(index=False))
+    elif args.comparison_only:
+        comparison = compare_all_pass1_algorithms_vs_others(summary)
+        comparison_path = OUTPUT_ROOT / "comparison_vs_other_algorithms.csv"
+        comparison.to_csv(comparison_path, index=False)
+        print(f"Wrote pass_1 all-algorithms comparison: {comparison_path}")
+        print(comparison.to_string(index=False))
+
+
+def run_comparison_only(args):
+    summary_path = Path(args.summary_path) if args.summary_path else (OUTPUT_ROOT / "summary.csv")
+    if not summary_path.exists():
+        raise FileNotFoundError(f"Summary CSV not found for comparison-only mode: {summary_path}")
+
+    summary = pd.read_csv(summary_path)
+    if args.compare_algorithm:
+        comparison = compare_pass1_algorithm_vs_others(summary, args.compare_algorithm)
+        label = "algorithm"
+    else:
+        comparison = compare_all_pass1_algorithms_vs_others(summary)
+        label = "all-algorithms"
+    comparison_path = OUTPUT_ROOT / "comparison_vs_other_algorithms.csv"
+    comparison.to_csv(comparison_path, index=False)
+    print(f"Loaded existing summary: {summary_path}")
+    print(f"Wrote pass_1 {label} comparison: {comparison_path}")
+    print(comparison.to_string(index=False))
 
 
 def run_single_dataset(csv_path: str, data_roots, args):
@@ -547,6 +754,10 @@ def main():
     data_roots = args.data_roots
     OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
 
+    if args.comparison_only:
+        run_comparison_only(args)
+        return
+
     all_summary_rows = []
 
     skip_stems = merged_skip_stems(args)
@@ -556,12 +767,8 @@ def main():
             print(f"Skipping excluded dataset: {csv_path}")
         else:
             all_summary_rows.extend(run_single_dataset(csv_path, data_roots, args))
-        summary_path = OUTPUT_ROOT / "summary.csv"
         summary = pd.DataFrame(all_summary_rows)
-        summary.to_csv(summary_path, index=False)
-        print(f"Wrote combined summary: {summary_path}")
-        if not summary.empty:
-            print(summary.to_string(index=False))
+        write_summary_and_optional_comparison(summary, args)
         return
 
     paths = sorted(glob.glob(args.input_glob, recursive=True))
@@ -576,12 +783,8 @@ def main():
         all_summary_rows.extend(run_single_dataset(path, data_roots, args))
         print()
 
-    summary_path = OUTPUT_ROOT / "summary.csv"
     summary = pd.DataFrame(all_summary_rows)
-    summary.to_csv(summary_path, index=False)
-    print(f"Wrote combined summary: {summary_path}")
-    if not summary.empty:
-        print(summary.to_string(index=False))
+    write_summary_and_optional_comparison(summary, args)
 
 
 if __name__ == "__main__":
